@@ -4,8 +4,8 @@
              x:Class="Fourplaces.HomePage">
     <ContentPage.Content>
         <StackLayout Orientation="Vertical" VerticalOptions="CenterAndExpand">
-            <Button></Button>
-            <Button></Button>
+            <Button  Text="Connexion" />
+            <Button Text="Inscription" />
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>

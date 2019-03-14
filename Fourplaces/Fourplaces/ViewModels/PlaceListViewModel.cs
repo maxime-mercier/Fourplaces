@@ -44,8 +44,6 @@ namespace Fourplaces.ViewModels
 
         public async void GoToDetailPage()
         {
-            Dictionary<string, object> dico = new Dictionary<string, object>();
-            dico.Add("SelectedPlace", SelectedPlace);
             await Navigation.PushAsync(new PageDetail(SelectedPlace));
 
             /*IDataService*/

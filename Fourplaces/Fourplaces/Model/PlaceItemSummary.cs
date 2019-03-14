@@ -18,7 +18,7 @@ namespace Fourplaces.Model
 		[JsonProperty("description")]
 		public string Description { get; set; }
 
-        public int _imageId;
+        private int _imageId;
 
         [JsonProperty("image_id")]
         public int ImageId
