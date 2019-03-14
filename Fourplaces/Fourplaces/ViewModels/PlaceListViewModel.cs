@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
-using Fourplaces.Common.Api.Dtos;
 using Fourplaces.Model;
 using Fourplaces.Services;
 using Storm.Mvvm;

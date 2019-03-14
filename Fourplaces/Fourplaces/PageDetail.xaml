@@ -5,15 +5,15 @@
              xmlns:forms="clr-namespace:Storm.Mvvm.Forms;assembly=Storm.Mvvm.Forms"
              x:Class="Fourplaces.PageDetail">
     <ContentPage.Content>
-        <StackLayout Orientation="Vertical">
-            <maps:Map WidthRequest="700" HeightRequest="100" IsShowingUser="True" x:Name="MyMap" MapType="Hybrid" />
+        <StackLayout Orientation="Vertical" VerticalOptions="FillAndExpand">
+            <maps:Map WidthRequest="700" HeightRequest="200" IsShowingUser="True" x:Name="MyMap" MapType="Hybrid" />
             <Image Source="{Binding ImageSrc}"/>
             <Label Text="{Binding Title}"/>
             <Label Text="{Binding Description}"/>
             <ListView ItemsSource="{Binding Comments}" >
                 <ListView.ItemTemplate>
                     <DataTemplate>
-                        <TextCell Detail="{Binding Description}" Text="{Binding Title}"/>
+                        <TextCell Detail="{Binding Text}" Text="{Binding CommentAuthorAndDate}"/>
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>

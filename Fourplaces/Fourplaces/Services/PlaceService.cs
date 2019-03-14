@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Fourplaces.Common.Api.Dtos;
 using Fourplaces.Model;
 using Newtonsoft.Json;
 

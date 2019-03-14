@@ -1,6 +1,6 @@
 ﻿using System;
+using System.Collections.ObjectModel;
 using System.Threading.Tasks;
-using Fourplaces.Common.Api.Dtos;
 using Fourplaces.Model;
 using Fourplaces.Services;
 using Storm.Mvvm;
@@ -13,6 +13,8 @@ namespace Fourplaces.ViewModels
         private string _imageSrc;
 
         public Map MyMap { get; set; }
+
+        public ObservableCollection<CommentItem> Comments { get; set; }
 
         public PlaceItemSummary CurrentPlace { get; set; }
 
@@ -56,18 +58,18 @@ namespace Fourplaces.ViewModels
                 Label = CurrentPlace.Title
             };
             MyMap.Pins.Add(pin);
+            Comments = new ObservableCollection<CommentItem>();
         }
 
-        public async override Task OnResume()
+        public override async Task OnResume()
         {
             await base.OnResume();
-            Response<PlaceItem> PlacesResponse = await PService.GetPlaces();
+            Response<PlaceItem> PlacesResponse = await PService.GetPlace(CurrentPlace.Id);
             if (PlacesResponse.IsSuccess)
             {
-                Places.Clear();
-                foreach (PlaceItemSummary item in PlacesResponse.Data)
+                foreach (var comment in PlacesResponse.Data.Comments)
                 {
-                    Places.Add(item);
+                    Comments.Add(comment);
                 }
             }
             else

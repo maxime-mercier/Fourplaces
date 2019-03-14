@@ -3,9 +3,9 @@ using Storm.Mvvm.Forms;
 
 namespace Fourplaces
 {
-    public partial class MainPage : BaseContentPage
+    public partial class PlaceListPage : BaseContentPage
     {
-        public MainPage()
+        public PlaceListPage()
         {
             InitializeComponent();
             BindingContext = new PlaceListViewModel(Navigation);

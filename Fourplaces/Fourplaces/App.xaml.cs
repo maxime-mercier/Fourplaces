@@ -13,7 +13,7 @@ namespace Fourplaces
             /*NavigationService.Configure("MainPage", typeof(MainPage));
             NavigationService.Configure("PageDetail", typeof(PageDetail));
             var mainPage = ((ViewNavigationService)NavigationService).SetRootPage("MainPage");*/
-            MainPage = new NavigationPage(new MainPage());
+            MainPage = new NavigationPage(new PlaceListPage());
             //MainPage = new MainPage();
         }
 
