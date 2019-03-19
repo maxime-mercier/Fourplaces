@@ -4,10 +4,11 @@
              x:Class="Fourplaces.SignUpPage">
     <ContentPage.Content>
         <StackLayout Orientation="Vertical">
-            <Entry Placeholder="Email" Keyboard="Email"/>
-            <Entry Placeholder="Prénom"/>
-            <Entry Placeholder="Nom"/>
-            <Entry Placeholder="Mot de passe" IsPassword="True"/>
+            <Entry Placeholder="Email" Keyboard="Email" Text="{Binding Email}"/>
+            <Entry Placeholder="Prénom" Text="{Binding FirstName}"/>
+            <Entry Placeholder="Nom" Text="{Binding LastName}"/>
+            <Entry Placeholder="Mot de passe" IsPassword="True" Text="{Binding Password}"/>
+            <Button Text="S'inscrire" Command="{Binding SignUpCommand}"/>
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>
