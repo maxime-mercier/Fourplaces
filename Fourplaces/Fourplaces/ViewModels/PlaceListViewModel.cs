@@ -17,9 +17,9 @@ namespace Fourplaces.ViewModels
 
         private PlaceItemSummary _selectedPlace;
 
-        //public INavigationService Navigation { get; set;}
+        //public INavigationService _navigation { get; set;}
 
-        public INavigation Navigation { get; set; }
+        public readonly INavigation _navigation;
 
         public PlaceItemSummary SelectedPlace
         {
@@ -31,12 +31,12 @@ namespace Fourplaces.ViewModels
             }
         }
 
-        private PlaceService PService = new PlaceService();
+        private readonly IPlaceService _pService = App.PService;
 
 
         public PlaceListViewModel(INavigation navigation)
         {
-            Navigation = navigation;
+            _navigation = navigation;
             Places = new ObservableCollection<PlaceItemSummary>();
             //Get images https://td-api.julienmialon.com/swagger/images/ + image_id dans Image_Src
         }
@@ -44,7 +44,7 @@ namespace Fourplaces.ViewModels
 
         public async void GoToDetailPage()
         {
-            await Navigation.PushAsync(new PageDetail(SelectedPlace));
+            await _navigation.PushAsync(new PageDetail(SelectedPlace));
 
             /*IDataService*/
         }
@@ -52,7 +52,7 @@ namespace Fourplaces.ViewModels
         public override async Task OnResume()
         {
             await base.OnResume();
-            Response<List<PlaceItemSummary>> PlacesResponse = await PService.GetPlaces();
+            Response<List<PlaceItemSummary>> PlacesResponse = await _pService.GetPlaces();
             if (PlacesResponse.IsSuccess)
             {
                 Places.Clear();

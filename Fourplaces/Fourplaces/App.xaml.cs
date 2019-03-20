@@ -1,4 +1,5 @@
 ﻿using System;
+using Fourplaces.Services;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -7,6 +8,9 @@ namespace Fourplaces
 {
     public partial class App : Application
     {
+
+        public static IPlaceService PService { get; } = new PlaceService();
+
         public App()
         {
             InitializeComponent();
@@ -19,7 +23,7 @@ namespace Fourplaces
 
         //public static INavigationService NavigationService { get; } = new ViewNavigationService();
 
-
+        
 
         protected override void OnStart()
         {

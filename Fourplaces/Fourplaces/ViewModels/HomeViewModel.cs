@@ -10,7 +10,7 @@ namespace Fourplaces.ViewModels
     class HomeViewModel : ViewModelBase
     {
 
-        public INavigation Navigation { get; set; }
+        private readonly INavigation _navigation;
 
         private ICommand _signUpCommand;
 
@@ -30,14 +30,14 @@ namespace Fourplaces.ViewModels
 
         public HomeViewModel(INavigation navigation)
         {
-            Navigation = navigation;
+            _navigation = navigation;
             SignInCommand = new Command(SignIn);
             SignUpCommand = new Command(SignUp);
         }
 
         public async void SignUp()
         {
-            await Navigation.PushAsync(new SignUpPage());
+            await _navigation.PushAsync(new SignUpPage());
         }
 
         public void SignIn()

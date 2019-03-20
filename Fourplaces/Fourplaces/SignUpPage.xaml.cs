@@ -10,7 +10,7 @@ namespace Fourplaces
 		public SignUpPage ()
 		{
 			InitializeComponent ();
-            BindingContext = new SignUpViewModel();
+            BindingContext = new SignUpViewModel(Navigation);
         }
 	}
 }

@@ -1,5 +1,7 @@
-﻿using System.Windows.Input;
+﻿using System;
+using System.Windows.Input;
 using Fourplaces.Model;
+using Fourplaces.Services;
 using Storm.Mvvm;
 using Xamarin.Forms;
 
@@ -7,6 +9,10 @@ namespace Fourplaces.ViewModels
 {
     class SignUpViewModel : ViewModelBase
     {
+        private readonly INavigation _navigation;
+
+        private readonly IPlaceService _pService = App.PService;
+
         private string _email;
 
         public string Email
@@ -47,13 +53,18 @@ namespace Fourplaces.ViewModels
             set => SetProperty(ref _signUpCommand, value);
         }
 
-        public SignUpViewModel()
+        public SignUpViewModel(INavigation navigation)
         {
+            _navigation = navigation;
             SignUpCommand = new Command(SignUp);
         }
 
         public async void SignUp()
         {
+            /*if (Email.Length <= 0)
+            {
+                await Application.Current.MainPage.DisplayAlert("Erreur", "Email non valide !", "ok", "Cancel");
+            }*/
             RegisterRequest request = new RegisterRequest
             {
                 Email = Email,
@@ -61,10 +72,17 @@ namespace Fourplaces.ViewModels
                 LastName = LastName,
                 Password = Password
             };
-            var email = Email;
-            var first = FirstName;
-            var last = LastName;
-            var password = Password;
+            Response<LoginResult> registerResult = await _pService.PostRegister(request);
+            if (registerResult.IsSuccess)
+            {
+                var access = _pService.AccessToken;
+                await Application.Current.MainPage.DisplayAlert("Inscription", "L'inscription a bien été effectuée!", "Ok");
+                //await _navigation.PushAsync(new SignInPage());
+            }
+            else
+            {
+                await Application.Current.MainPage.DisplayAlert("Erreur", registerResult.ErrorMessage + " " + _pService.AccessToken, "Ok");
+            }
         }
 
     }

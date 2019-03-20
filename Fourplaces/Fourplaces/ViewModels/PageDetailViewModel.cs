@@ -42,11 +42,11 @@ namespace Fourplaces.ViewModels
             set => SetProperty(ref _description, value);
         }
 
-        private PlaceService PService = new PlaceService();
+        private readonly IPlaceService _pService = App.PService;
 
-        public PageDetailViewModel(PlaceItemSummary SelectedPlace, Map myMap)
+        public PageDetailViewModel(PlaceItemSummary selectedPlace, Map myMap)
         {
-            CurrentPlace = SelectedPlace;
+            CurrentPlace = selectedPlace;
             Description = CurrentPlace.Description;
             Title = CurrentPlace.Title;
             ImageSrc = CurrentPlace.ImageSrc;
@@ -64,10 +64,10 @@ namespace Fourplaces.ViewModels
         public override async Task OnResume()
         {
             await base.OnResume();
-            Response<PlaceItem> PlacesResponse = await PService.GetPlace(CurrentPlace.Id);
-            if (PlacesResponse.IsSuccess)
+            Response<PlaceItem> placesResponse = await _pService.GetPlace(CurrentPlace.Id);
+            if (placesResponse.IsSuccess)
             {
-                foreach (var comment in PlacesResponse.Data.Comments)
+                foreach (var comment in placesResponse.Data.Comments)
                 {
                     Comments.Add(comment);
                 }
@@ -75,7 +75,7 @@ namespace Fourplaces.ViewModels
             else
 
             {
-                Console.WriteLine(PlacesResponse.ErrorMessage);
+                Console.WriteLine(placesResponse.ErrorMessage);
             }
 
         }
