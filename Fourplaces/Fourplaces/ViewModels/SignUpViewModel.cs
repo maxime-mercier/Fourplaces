@@ -75,13 +75,12 @@ namespace Fourplaces.ViewModels
             Response<LoginResult> registerResult = await _pService.PostRegister(request);
             if (registerResult.IsSuccess)
             {
-                var access = _pService.AccessToken;
                 await Application.Current.MainPage.DisplayAlert("Inscription", "L'inscription a bien été effectuée!", "Ok");
-                //await _navigation.PushAsync(new SignInPage());
+                await _navigation.PopToRootAsync();
             }
             else
             {
-                await Application.Current.MainPage.DisplayAlert("Erreur", registerResult.ErrorMessage + " " + _pService.AccessToken, "Ok");
+                await Application.Current.MainPage.DisplayAlert("Erreur", registerResult.ErrorMessage, "Ok");
             }
         }
 

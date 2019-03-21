@@ -40,9 +40,9 @@ namespace Fourplaces.ViewModels
             await _navigation.PushAsync(new SignUpPage());
         }
 
-        public void SignIn()
+        public async void SignIn()
         {
-
+            await _navigation.PushAsync(new SignInPage());
         }
     }
 }

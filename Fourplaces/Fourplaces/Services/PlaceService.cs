@@ -26,6 +26,7 @@ namespace Fourplaces.Services
         void GetImage(int id);
 
         Task<Response<LoginResult>> PostRegister(RegisterRequest request);
+        Task<Response<LoginResult>> PostLogin(LoginRequest request);
     }
 
     public class PlaceService : IPlaceService
@@ -33,7 +34,7 @@ namespace Fourplaces.Services
         public string AccessToken { get; set; }
 
         public string RefreshToken { get; }
-        public int ExpiresIn { get; }
+        public int ExpiresIn { get; set; }
 
         public async Task<Response<List<PlaceItemSummary>>> GetPlaces()
         {
@@ -99,7 +100,34 @@ namespace Fourplaces.Services
                     HttpResponseMessage response = await client.PostAsync("https://td-api.julienmialon.com/auth/register", new StringContent(registerRequest, Encoding.UTF8, "application/json-patch+json"));
                     var responseBody = await response.Content.ReadAsStringAsync();
                     Response<LoginResult> res = JsonConvert.DeserializeObject<Response<LoginResult>>(responseBody);
-                    if (res.IsSuccess) AccessToken = res.Data.AccessToken;
+                    return res;
+                }
+                catch (HttpRequestException e)
+                {
+                    return new Response<LoginResult>()
+                    {
+                        IsSuccess = false,
+                        ErrorMessage = e.Message
+                    };
+                }
+            }
+        }
+
+        public async Task<Response<LoginResult>> PostLogin(LoginRequest request)
+        {
+            using (HttpClient client = new HttpClient())
+            {
+                try
+                {
+                    var loginRequest = JsonConvert.SerializeObject(request);
+                    HttpResponseMessage response = await client.PostAsync("https://td-api.julienmialon.com/auth/login", new StringContent(loginRequest, Encoding.UTF8, "application/json-patch+json"));
+                    var responseBody = await response.Content.ReadAsStringAsync();
+                    Response<LoginResult> res = JsonConvert.DeserializeObject<Response<LoginResult>>(responseBody);
+                    if (res.IsSuccess)
+                    {
+                        AccessToken = res.Data.AccessToken;
+                        ExpiresIn = res.Data.ExpiresIn;
+                    }
                     return res;
                 }
                 catch (HttpRequestException e)

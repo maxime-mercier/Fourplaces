@@ -4,9 +4,9 @@
              x:Class="Fourplaces.SignInPage">
     <ContentPage.Content>
         <StackLayout>
-            <Label Text="Welcome to Xamarin.Forms!"
-                VerticalOptions="CenterAndExpand" 
-                HorizontalOptions="CenterAndExpand" />
+            <Entry Text="{Binding Email}" Placeholder="Email" Keyboard="Email"/>
+            <Entry Text="{Binding Password}" Placeholder="Mot de passe" IsPassword="True"/>
+            <Button Text="Se connecter" Command="{Binding SignInCommand}"/>
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>
