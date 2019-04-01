@@ -7,15 +7,15 @@ using Fourplaces.ViewModels;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
-namespace Fourplaces
+namespace Fourplaces.Pages
 {
 	[XamlCompilation(XamlCompilationOptions.Compile)]
-	public partial class SignInPage : ContentPage
+	public partial class AddCommentPage : ContentPage
 	{
-		public SignInPage ()
+		public AddCommentPage (int placeId)
 		{
 			InitializeComponent ();
-            BindingContext = new SignInViewModel(Navigation);
+            BindingContext = new AddCommentVIewModel(placeId, Navigation);
         }
 	}
 }

@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Fourplaces.Pages.HomePage">
+    <ContentPage.Content>
+        <StackLayout Orientation="Vertical" VerticalOptions="CenterAndExpand">
+            <Button  Text="Connexion" Command="{Binding SignInCommand}"/>
+            <Button Text="Inscription" Command="{Binding SignUpCommand}"/>
+        </StackLayout>
+    </ContentPage.Content>
+</ContentPage>

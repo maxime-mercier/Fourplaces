@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using Fourplaces.Model;
+using Fourplaces.Pages;
 using Fourplaces.Services;
 using Storm.Mvvm;
 using Xamarin.Forms;
@@ -19,7 +20,7 @@ namespace Fourplaces.ViewModels
 
         //public INavigationService _navigation { get; set;}
 
-        public readonly INavigation _navigation;
+        private readonly INavigation _navigation;
 
         public PlaceItemSummary SelectedPlace
         {

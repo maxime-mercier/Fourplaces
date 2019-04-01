@@ -2,14 +2,15 @@
 using Fourplaces.Services;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
+using Fourplaces.Pages;
 
 [assembly: XamlCompilation(XamlCompilationOptions.Compile)]
 namespace Fourplaces
 {
     public partial class App : Application
     {
-
         public static IPlaceService PService { get; } = new PlaceService();
+        public static string TokenScheme = "Bearer";
 
         public App()
         {

@@ -2,15 +2,15 @@
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
-namespace Fourplaces
+namespace Fourplaces.Pages
 {
 	[XamlCompilation(XamlCompilationOptions.Compile)]
-	public partial class SignUpPage : ContentPage
+	public partial class SignInPage : ContentPage
 	{
-		public SignUpPage ()
+		public SignInPage ()
 		{
 			InitializeComponent ();
-            BindingContext = new SignUpViewModel(Navigation);
+            BindingContext = new SignInViewModel(Navigation);
         }
 	}
 }

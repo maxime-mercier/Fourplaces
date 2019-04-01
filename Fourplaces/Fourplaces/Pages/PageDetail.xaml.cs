@@ -1,10 +1,9 @@
 ﻿using Fourplaces.Model;
 using Fourplaces.ViewModels;
 using Storm.Mvvm.Forms;
-using Xamarin.Forms.Maps;
 using Xamarin.Forms.Xaml;
 
-namespace Fourplaces
+namespace Fourplaces.Pages
 {
 	[XamlCompilation(XamlCompilationOptions.Compile)]
 	public partial class PageDetail : BaseContentPage
@@ -13,7 +12,7 @@ namespace Fourplaces
         public PageDetail(PlaceItemSummary SelectedPlace)
         {
             InitializeComponent();
-            BindingContext = new PageDetailViewModel(SelectedPlace, MyMap);
+            BindingContext = new PageDetailViewModel(SelectedPlace, MyMap, Navigation);
         }
 	}
 }

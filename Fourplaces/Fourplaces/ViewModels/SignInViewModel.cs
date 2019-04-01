@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Windows.Input;
+﻿using System.Windows.Input;
 using Fourplaces.Model;
+using Fourplaces.Pages;
 using Fourplaces.Services;
 using Storm.Mvvm;
 using Xamarin.Forms;
@@ -15,6 +13,14 @@ namespace Fourplaces.ViewModels
         private readonly INavigation _navigation;
 
         private readonly IPlaceService _pService = App.PService;
+
+        private bool _signInButtonEnabled;
+
+        public bool SignInButtonEnabled
+        {
+            get => _signInButtonEnabled;
+            set => SetProperty(ref _signInButtonEnabled, value);
+        }
 
         private string _email;
 
@@ -43,11 +49,13 @@ namespace Fourplaces.ViewModels
         public SignInViewModel(INavigation navigation)
         {
             _navigation = navigation;
+            SignInButtonEnabled = true;
             SignInCommand = new Command(SignIn);
         }
 
         public async void SignIn()
         {
+            SignInButtonEnabled = false;
             LoginRequest request = new LoginRequest()
             {
                 Email = Email,
@@ -56,6 +64,8 @@ namespace Fourplaces.ViewModels
             Response<LoginResult> registerResult = await _pService.PostLogin(request);
             if (registerResult.IsSuccess)
             {
+                //Disable button pour empecher d'ouvrir plusieurs pages 
+
                 //var access = _pService.AccessToken;
                 await Application.Current.MainPage.DisplayAlert("Connexion", "La connexion a bien été effectuée!", "Ok");
                 await _navigation.PushAsync(new PlaceListPage());
@@ -63,6 +73,7 @@ namespace Fourplaces.ViewModels
             else
             {
                 await Application.Current.MainPage.DisplayAlert("Erreur", registerResult.ErrorMessage, "Ok");
+                SignInButtonEnabled = true;
             }
         }
     }

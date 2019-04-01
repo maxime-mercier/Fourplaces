@@ -1,11 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="Fourplaces.HomePage">
+             x:Class="Fourplaces.Pages.AddCommentPage">
     <ContentPage.Content>
         <StackLayout Orientation="Vertical" VerticalOptions="CenterAndExpand">
-            <Button  Text="Connexion" Command="{Binding SignInCommand}"/>
-            <Button Text="Inscription" Command="{Binding SignUpCommand}"/>
+            <Editor Text="{Binding Comment}" Placeholder="Commentaire" AutoSize="TextChanges"/>
+            <Button Text="Ajouter un commentaire" Command="{Binding PostCommentCommand}"/>
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>

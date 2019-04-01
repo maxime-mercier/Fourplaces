@@ -1,12 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="Fourplaces.SignInPage">
+             x:Class="Fourplaces.Pages.SignInPage">
     <ContentPage.Content>
         <StackLayout>
             <Entry Text="{Binding Email}" Placeholder="Email" Keyboard="Email"/>
             <Entry Text="{Binding Password}" Placeholder="Mot de passe" IsPassword="True"/>
-            <Button Text="Se connecter" Command="{Binding SignInCommand}"/>
+            <Button Text="Se connecter" Command="{Binding SignInCommand}" IsEnabled="{Binding SignInButtonEnabled}"/>
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>

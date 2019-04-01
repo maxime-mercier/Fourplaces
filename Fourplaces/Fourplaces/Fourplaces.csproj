@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="PlaceListPage.xaml.cs">
+    <Compile Update="Pages\PlaceListPage.xaml.cs">
       <DependentUpon>PlaceListPage.xaml</DependentUpon>
     </Compile>
   </ItemGroup>
@@ -28,13 +28,16 @@
     <EmbeddedResource Update="HomePage.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
-    <EmbeddedResource Update="PageDetail.xaml">
+    <EmbeddedResource Update="Pages\AddCommentPage.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
-    <EmbeddedResource Update="SignInPage.xaml">
+    <EmbeddedResource Update="Pages\PageDetail.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
-    <EmbeddedResource Update="SignUpPage.xaml">
+    <EmbeddedResource Update="Pages\SignInPage.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Pages\SignUpPage.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
   </ItemGroup>

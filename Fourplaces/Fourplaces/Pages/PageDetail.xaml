@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:maps="clr-namespace:Xamarin.Forms.Maps;assembly=Xamarin.Forms.Maps"
              xmlns:forms="clr-namespace:Storm.Mvvm.Forms;assembly=Storm.Mvvm.Forms"
-             x:Class="Fourplaces.PageDetail">
+             x:Class="Fourplaces.Pages.PageDetail">
     <ContentPage.Content>
         <StackLayout Orientation="Vertical" VerticalOptions="FillAndExpand">
             <maps:Map WidthRequest="700" HeightRequest="200" IsShowingUser="True" x:Name="MyMap" MapType="Hybrid" />
@@ -17,6 +17,7 @@
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
+            <Button Text="Ajouter un commentaire" Command="{Binding AddCommentCommand}"/>
         </StackLayout>
     </ContentPage.Content>
 </forms:BaseContentPage>

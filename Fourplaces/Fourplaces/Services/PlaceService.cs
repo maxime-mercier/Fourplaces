@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Runtime.ConstrainedExecution;
 using System.Text;
 using System.Threading.Tasks;
 using Fourplaces.Model;
@@ -26,13 +28,15 @@ namespace Fourplaces.Services
         void GetImage(int id);
 
         Task<Response<LoginResult>> PostRegister(RegisterRequest request);
+
         Task<Response<LoginResult>> PostLogin(LoginRequest request);
+
+        Task<Response> PostComment(CreateCommentRequest commentRequest, int placeId);
     }
 
     public class PlaceService : IPlaceService
     {
         public string AccessToken { get; set; }
-
         public string RefreshToken { get; }
         public int ExpiresIn { get; set; }
 
@@ -140,5 +144,19 @@ namespace Fourplaces.Services
                 }
             }
         }
+
+        public async Task<Response> PostComment(CreateCommentRequest createCommentRequest, int placeId)
+        {
+            using (HttpClient client = new HttpClient())
+            {
+                var commentRequest = JsonConvert.SerializeObject(createCommentRequest);
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(App.TokenScheme, AccessToken);
+                HttpResponseMessage response = await client.PostAsync("https://td-api.julienmialon.com/places/" + placeId + "/comments", new StringContent(commentRequest, Encoding.UTF8, "application/json-patch+json"));
+                var responseBody = await response.Content.ReadAsStringAsync();
+                Response res = JsonConvert.DeserializeObject<Response>(responseBody);
+                return res;
+            }
+        }
+
     }
 }

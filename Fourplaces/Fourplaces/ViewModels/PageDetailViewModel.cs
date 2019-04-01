@@ -1,15 +1,20 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
+using System.Windows.Input;
 using Fourplaces.Model;
+using Fourplaces.Pages;
 using Fourplaces.Services;
 using Storm.Mvvm;
+using Xamarin.Forms;
 using Xamarin.Forms.Maps;
 
 namespace Fourplaces.ViewModels
 {
     class PageDetailViewModel : ViewModelBase
     {
+        private readonly INavigation _navigation;
+
         private string _imageSrc;
 
         public Map MyMap { get; set; }
@@ -17,6 +22,14 @@ namespace Fourplaces.ViewModels
         public ObservableCollection<CommentItem> Comments { get; set; }
 
         public PlaceItemSummary CurrentPlace { get; set; }
+
+        private ICommand _addCommentCommand;
+
+        public ICommand AddCommentCommand
+        {
+            get => _addCommentCommand;
+            set => SetProperty(ref _addCommentCommand, value);
+        }
 
         public string ImageSrc
         {
@@ -44,13 +57,14 @@ namespace Fourplaces.ViewModels
 
         private readonly IPlaceService _pService = App.PService;
 
-        public PageDetailViewModel(PlaceItemSummary selectedPlace, Map myMap)
+        public PageDetailViewModel(PlaceItemSummary selectedPlace, Map myMap, INavigation navigation)
         {
             CurrentPlace = selectedPlace;
             Description = CurrentPlace.Description;
             Title = CurrentPlace.Title;
             ImageSrc = CurrentPlace.ImageSrc;
             MyMap = myMap;
+            _navigation = navigation;
             MyMap.MoveToRegion(MapSpan.FromCenterAndRadius(new Position(CurrentPlace.Latitude, CurrentPlace.Longitude), Distance.FromKilometers(1)));
             var pin = new Pin()
             {
@@ -59,6 +73,12 @@ namespace Fourplaces.ViewModels
             };
             MyMap.Pins.Add(pin);
             Comments = new ObservableCollection<CommentItem>();
+            AddCommentCommand = new Command(AddComment);
+        }
+
+        private async void AddComment()
+        {
+            await _navigation.PushAsync(new AddCommentPage(CurrentPlace.Id));
         }
 
         public override async Task OnResume()
