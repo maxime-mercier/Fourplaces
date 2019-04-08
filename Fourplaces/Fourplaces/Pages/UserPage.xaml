@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<forms:BaseContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:forms="clr-namespace:Storm.Mvvm.Forms;assembly=Storm.Mvvm.Forms"
+             x:Class="Fourplaces.Pages.UserPage">
+    <forms:BaseContentPage.Content>
+        <StackLayout IsVisible="{Binding UserInfoIsVisible}">
+            <Image Source="{Binding UserImage}" HorizontalOptions="Center" Aspect="AspectFit" WidthRequest="100" HeightRequest="100" Margin="25"/>
+            <Label Text="{Binding Email}" 
+                   HorizontalOptions="Center"/>
+            <Label Text="{Binding Name}" 
+                HorizontalOptions="Center" Margin="5"/>
+            <Button Text="Modifier mon profil" Command="{Binding GoToUserNamePage}"/>
+            <Button Text="Modifier mon mot de passe" Command="{Binding GoToPasswordPageCommand}"/>
+        </StackLayout>
+    </forms:BaseContentPage.Content>
+</forms:BaseContentPage>

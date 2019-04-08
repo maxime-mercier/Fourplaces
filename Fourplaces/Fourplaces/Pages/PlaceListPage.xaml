@@ -4,6 +4,18 @@
              xmlns:forms="clr-namespace:Storm.Mvvm.Forms;assembly=Storm.Mvvm.Forms"
              x:Class="Fourplaces.Pages.PlaceListPage">
 
+    <forms:BaseContentPage.ToolbarItems>
+        <ToolbarItem Text="Profil"
+                     Priority="1"
+                     Icon="userLogo.png"
+                     Order="Primary"
+                     Command="{Binding GoToUserPageCommand}"/>
+        <ToolbarItem Text="Ajouter un lieu"
+                     Priority="0"
+                     Icon="add.png"
+                     Command="{Binding GoToAddPlacePageCommand}"/>
+    </forms:BaseContentPage.ToolbarItems>
+
     <StackLayout>
         <ListView ItemsSource="{Binding Places}" SelectedItem="{Binding SelectedPlace, Mode=TwoWay}" >
             <ListView.ItemTemplate>

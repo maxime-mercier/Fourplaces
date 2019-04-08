@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Fourplaces.Pages.ModifyUserPage">
+    <ContentPage.Content>
+        <StackLayout>
+            <StackLayout Orientation="Vertical" IsVisible="{Binding ModifyUserInfo}">
+                <Button Text="Ajouter une nouvelle image de profil" Command="{Binding AddImageCommand}"/>
+                <Entry Placeholder="Nouveau prenom" Text="{Binding NewFirstName}"/>
+                <Entry Placeholder="Nouveau nom" Text="{Binding NewLastName}"/>
+                <Button Text="Modifier" Command="{Binding ModifyUserCommand}"/>
+            </StackLayout>
+            <StackLayout Orientation="Vertical" IsVisible="{Binding ModifyPassword}">
+                <Entry Placeholder="Ancien mot de passe" Text="{Binding OldPassword}"/>
+                <Entry Placeholder="Nouveau mot de passe" Text="{Binding NewPassword}"/>
+                <Button Text="Modifier mon mot de passe" Command="{Binding ModifyPasswordCommand}"/>
+            </StackLayout>
+        </StackLayout>
+    </ContentPage.Content>
+</ContentPage>

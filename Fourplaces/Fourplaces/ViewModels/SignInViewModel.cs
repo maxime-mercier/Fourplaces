@@ -1,4 +1,6 @@
-﻿using System.Windows.Input;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Windows.Input;
 using Fourplaces.Model;
 using Fourplaces.Pages;
 using Fourplaces.Services;
@@ -68,7 +70,10 @@ namespace Fourplaces.ViewModels
 
                 //var access = _pService.AccessToken;
                 await Application.Current.MainPage.DisplayAlert("Connexion", "La connexion a bien été effectuée!", "Ok");
-                await _navigation.PushAsync(new PlaceListPage());
+                var test = _navigation.NavigationStack.Count;
+                List<Page> existingPages = _navigation.NavigationStack.ToList();
+                _navigation.InsertPageBefore(new PlaceListPage(), existingPages[0]);
+                await _navigation.PopToRootAsync();
             }
             else
             {
