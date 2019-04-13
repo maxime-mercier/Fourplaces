@@ -4,12 +4,13 @@ using System.Text;
 using System.Windows.Input;
 using Fourplaces.Model;
 using Fourplaces.Services;
+using Plugin.Connectivity;
 using Storm.Mvvm;
 using Xamarin.Forms;
 
 namespace Fourplaces.ViewModels
 {
-    class AddCommentVIewModel : ViewModelBase
+    class AddCommentViewModel : ViewModelBase
     {
 
         private readonly INavigation _navigation;
@@ -34,7 +35,7 @@ namespace Fourplaces.ViewModels
 
         private readonly IPlaceService _pService = App.PService;
 
-        public AddCommentVIewModel(int placeID, INavigation navigation)
+        public AddCommentViewModel(int placeID, INavigation navigation)
         {
             PostCommentCommand = new Command(PostComment);
             _placeId = placeID;
@@ -43,23 +44,30 @@ namespace Fourplaces.ViewModels
 
         private async void PostComment()
         {
-            if (string.IsNullOrEmpty(Comment))
+            if (CrossConnectivity.Current.IsConnected)
             {
-                await Application.Current.MainPage.DisplayAlert("Erreur", "Veuillez ajouter un commentaire", "Ok");
-            }
-            else
-            {
-                CreateCommentRequest request = new CreateCommentRequest() {Text = Comment};
-                Response addCommentResult = await _pService.PostComment(request, _placeId);
-                if (addCommentResult.IsSuccess)
-                { 
-                    await Application.Current.MainPage.DisplayAlert("Succès", "Le commentaire à bien été ajouté!", "Ok");
-                    await _navigation.PopAsync();
+                if (string.IsNullOrEmpty(Comment))
+                {
+                    await Application.Current.MainPage.DisplayAlert("Erreur", "Veuillez ajouter un commentaire", "Ok");
                 }
                 else
                 {
-                    await Application.Current.MainPage.DisplayAlert("Erreur", addCommentResult.ErrorMessage, "Ok");
+                    CreateCommentRequest request = new CreateCommentRequest() {Text = Comment};
+                    Response addCommentResult = await _pService.PostComment(request, _placeId);
+                    if (addCommentResult.IsSuccess)
+                    { 
+                        await Application.Current.MainPage.DisplayAlert("Succès", "Le commentaire à bien été ajouté!", "Ok");
+                        await _navigation.PopAsync();
+                    }
+                    else
+                    {
+                        await Application.Current.MainPage.DisplayAlert("Erreur", addCommentResult.ErrorMessage, "Ok");
+                    }
                 }
+            }
+            else
+            {
+                await Application.Current.MainPage.DisplayAlert("Erreur", "Une connexion internet est nécessaire pour ajouter un commentaire.", "Ok");
             }
         }
     }

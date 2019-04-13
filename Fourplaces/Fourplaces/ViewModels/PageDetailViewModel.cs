@@ -5,6 +5,8 @@ using System.Windows.Input;
 using Fourplaces.Model;
 using Fourplaces.Pages;
 using Fourplaces.Services;
+using MonkeyCache.SQLite;
+using Plugin.Connectivity;
 using Storm.Mvvm;
 using Xamarin.Forms;
 using Xamarin.Forms.Maps;
@@ -21,7 +23,7 @@ namespace Fourplaces.ViewModels
 
         public ObservableCollection<CommentItem> Comments { get; set; }
 
-        public PlaceItemSummary CurrentPlace { get; set; }
+        private int CurrentPlaceId { get; set; }
 
         private ICommand _addCommentCommand;
 
@@ -56,48 +58,70 @@ namespace Fourplaces.ViewModels
         }
 
         private readonly IPlaceService _pService = App.PService;
+        private string _cacheUrl;
 
-        public PageDetailViewModel(PlaceItemSummary selectedPlace, Map myMap, INavigation navigation)
+        public PageDetailViewModel(int selectedPlaceId, Map myMap, INavigation navigation)
         {
-            CurrentPlace = selectedPlace;
-            Description = CurrentPlace.Description;
-            Title = CurrentPlace.Title;
-            ImageSrc = CurrentPlace.ImageSrc;
+            CurrentPlaceId = selectedPlaceId;
             MyMap = myMap;
             _navigation = navigation;
-            MyMap.MoveToRegion(MapSpan.FromCenterAndRadius(new Position(CurrentPlace.Latitude, CurrentPlace.Longitude), Distance.FromKilometers(1)));
-            var pin = new Pin()
-            {
-                Position = new Position(CurrentPlace.Latitude, CurrentPlace.Longitude),
-                Label = CurrentPlace.Title
-            };
-            MyMap.Pins.Add(pin);
             Comments = new ObservableCollection<CommentItem>();
             AddCommentCommand = new Command(AddComment);
+            _cacheUrl = "placeDetailCache" + CurrentPlaceId;
         }
 
         private async void AddComment()
         {
-            await _navigation.PushAsync(new AddCommentPage(CurrentPlace.Id));
+            await _navigation.PushAsync(new AddCommentPage(CurrentPlaceId));
         }
+
+
 
         public override async Task OnResume()
         {
             await base.OnResume();
-            Response<PlaceItem> placesResponse = await _pService.GetPlace(CurrentPlace.Id);
-            if (placesResponse.IsSuccess)
+            PlaceItem place = null;
+            if (!CrossConnectivity.Current.IsConnected)
             {
-                foreach (var comment in placesResponse.Data.Comments)
+                place = Barrel.Current.Get<PlaceItem>(_cacheUrl);
+            }
+            else
+            {
+                Response<PlaceItem> placesResponse = await _pService.GetPlace(CurrentPlaceId);
+                if (placesResponse.IsSuccess)
+                {
+                    place = placesResponse.Data;
+                    Barrel.Current.Add(_cacheUrl, place, TimeSpan.FromHours(1));
+                }
+                else
+
+                {
+                    await Application.Current.MainPage.DisplayAlert("Erreur", placesResponse.ErrorMessage, "Ok");
+                }
+            }
+
+            if (place != null)
+            {
+                Description = place.Description;
+                Title = place.Title;
+                ImageSrc = "https://td-api.julienmialon.com/images" + place.ImageId;
+                MyMap.MoveToRegion(MapSpan.FromCenterAndRadius(new Position(place.Latitude, place.Longitude), Distance.FromKilometers(1)));
+                var pin = new Pin()
+                {
+                    Position = new Position(place.Latitude, place.Longitude),
+                    Label = place.Title
+                };
+                MyMap.Pins.Add(pin);
+                foreach (var comment in place.Comments)
                 {
                     Comments.Add(comment);
                 }
             }
             else
-
             {
-                Console.WriteLine(placesResponse.ErrorMessage);
+                await Application.Current.MainPage.DisplayAlert("Erreur", "Impossible d'accéder au détail du lieu sélectionné", "Ok");
+                await _navigation.PopAsync();
             }
-
         }
     }
 }

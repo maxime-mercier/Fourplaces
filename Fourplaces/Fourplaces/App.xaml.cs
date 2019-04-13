@@ -3,6 +3,7 @@ using Fourplaces.Services;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 using Fourplaces.Pages;
+using MonkeyCache.SQLite;
 
 [assembly: XamlCompilation(XamlCompilationOptions.Compile)]
 namespace Fourplaces
@@ -18,6 +19,7 @@ namespace Fourplaces
             /*NavigationService.Configure("MainPage", typeof(MainPage));
             NavigationService.Configure("PageDetail", typeof(PageDetail));
             var mainPage = ((ViewNavigationService)NavigationService).SetRootPage("MainPage");*/
+            Barrel.ApplicationId = "Fourplaces";
             MainPage = new NavigationPage(new HomePage());
             //MainPage = new MainPage();
         }

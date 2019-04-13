@@ -4,6 +4,7 @@ using System.Windows.Input;
 using Fourplaces.Model;
 using Fourplaces.Pages;
 using Fourplaces.Services;
+using Plugin.Connectivity;
 using Storm.Mvvm;
 using Xamarin.Forms;
 
@@ -57,28 +58,42 @@ namespace Fourplaces.ViewModels
 
         public async void SignIn()
         {
-            SignInButtonEnabled = false;
-            LoginRequest request = new LoginRequest()
+            if (CrossConnectivity.Current.IsConnected)
             {
-                Email = Email,
-                Password = Password
-            };
-            Response<LoginResult> registerResult = await _pService.PostLogin(request);
-            if (registerResult.IsSuccess)
-            {
-                //Disable button pour empecher d'ouvrir plusieurs pages 
+                if (string.IsNullOrEmpty(Email) || string.IsNullOrEmpty(Password))
+                {
+                    await Application.Current.MainPage.DisplayAlert("Erreur", "Un ou plusieurs champs sont vides !", "Ok");
+                }
+                else
+                {
+                    SignInButtonEnabled = false;
+                    LoginRequest request = new LoginRequest()
+                    {
+                        Email = Email,
+                        Password = Password
+                    };
+                    Response<LoginResult> registerResult = await _pService.PostLogin(request);
+                    if (registerResult.IsSuccess)
+                    {
+                        //Disable button pour empecher d'ouvrir plusieurs pages 
 
-                //var access = _pService.AccessToken;
-                await Application.Current.MainPage.DisplayAlert("Connexion", "La connexion a bien été effectuée!", "Ok");
-                var test = _navigation.NavigationStack.Count;
-                List<Page> existingPages = _navigation.NavigationStack.ToList();
-                _navigation.InsertPageBefore(new PlaceListPage(), existingPages[0]);
-                await _navigation.PopToRootAsync();
+                        //var access = _pService.AccessToken;
+                        await Application.Current.MainPage.DisplayAlert("Connexion", "La connexion a bien été effectuée!", "Ok");
+                        var test = _navigation.NavigationStack.Count;
+                        List<Page> existingPages = _navigation.NavigationStack.ToList();
+                        _navigation.InsertPageBefore(new PlaceListPage(), existingPages[0]);
+                        await _navigation.PopToRootAsync();
+                    }
+                    else
+                    {
+                        await Application.Current.MainPage.DisplayAlert("Erreur", registerResult.ErrorMessage, "Ok");
+                        SignInButtonEnabled = true;
+                    }
+                }
             }
             else
             {
-                await Application.Current.MainPage.DisplayAlert("Erreur", registerResult.ErrorMessage, "Ok");
-                SignInButtonEnabled = true;
+                await Application.Current.MainPage.DisplayAlert("Erreur", "Une connexion internet est nécessaire pour se connecter.", "Ok");
             }
         }
     }

@@ -28,8 +28,6 @@ namespace Fourplaces.Services
 
         Task<Response<ImageItem>> PostImage(MediaFile image);
 
-        void GetImage(int id);
-
         Task<Response<LoginResult>> PostRegister(RegisterRequest request);
 
         Task<Response<LoginResult>> PostLogin(LoginRequest request);
@@ -39,7 +37,10 @@ namespace Fourplaces.Services
         Task<Response<UserItem>> GetUser();
 
         Task<Response<UserItem>> PatchProfile(UpdateProfileRequest updateProfileRequest);
+
         Task<Response> PatchPassword(UpdatePasswordRequest updatePasswordRequest);
+
+        Task<Response> PostPlace(CreatePlaceRequest createPlaceRequest);
     }
 
     public class PlaceService : IPlaceService
@@ -267,6 +268,25 @@ namespace Fourplaces.Services
                 string uri = "https://td-api.julienmialon.com/me/password";
                 string responseBody =
                     await GenericHttpRequest(uri, "PATCH", true, updatePasswordRequest);
+                return JsonConvert.DeserializeObject<Response>(responseBody);
+            }
+            catch (HttpRequestException e)
+            {
+                return new Response
+                {
+                    IsSuccess = false,
+                    ErrorMessage = e.Message
+                };
+            }
+        }
+
+        public async Task<Response> PostPlace(CreatePlaceRequest createPlaceRequest)
+        {
+            try
+            {
+                string uri = "https://td-api.julienmialon.com/places";
+                string responseBody =
+                    await GenericHttpRequest(uri, "POST", true, createPlaceRequest);
                 return JsonConvert.DeserializeObject<Response>(responseBody);
             }
             catch (HttpRequestException e)

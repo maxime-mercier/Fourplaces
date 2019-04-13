@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<forms:BaseContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:forms="clr-namespace:Storm.Mvvm.Forms;assembly=Storm.Mvvm.Forms"
+             x:Class="Fourplaces.Pages.AddPlacePage">
+    <forms:BaseContentPage.Content>
+        <StackLayout>
+            <Button Text="Selectionner une image depuis la galerie" Command="{Binding AddImageCommand}"/>
+            <Button Text="Prendre une photo" Command="{Binding TakePictureCommand}"/>
+            <Entry Text="{Binding Title}" Placeholder="Titre"/>
+            <Editor Text="{Binding Description}" Placeholder="Description" AutoSize="TextChanges"/>
+            <Entry Text="{Binding Latitude}" Placeholder="Latitude" Keyboard="Numeric"/>
+            <Entry Text="{Binding Longitude}" Placeholder="Longitude" Keyboard="Numeric"/>
+            <Button Text="Ajouter le lieu" Command="{Binding AddPlaceCommand}"/>
+        </StackLayout>
+    </forms:BaseContentPage.Content>
+</forms:BaseContentPage>

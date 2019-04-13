@@ -6,13 +6,13 @@ using Xamarin.Forms.Xaml;
 namespace Fourplaces.Pages
 {
 	[XamlCompilation(XamlCompilationOptions.Compile)]
-	public partial class PageDetail : BaseContentPage
-	{
+	public partial class PageDetail
+    {
 
-        public PageDetail(PlaceItemSummary SelectedPlace)
+        public PageDetail(int selectedPlaceId)
         {
             InitializeComponent();
-            BindingContext = new PageDetailViewModel(SelectedPlace, MyMap, Navigation);
+            BindingContext = new PageDetailViewModel(selectedPlaceId, MyMap, Navigation);
         }
 	}
 }

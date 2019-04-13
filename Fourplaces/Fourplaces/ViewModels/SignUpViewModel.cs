@@ -2,6 +2,7 @@
 using System.Windows.Input;
 using Fourplaces.Model;
 using Fourplaces.Services;
+using Plugin.Connectivity;
 using Storm.Mvvm;
 using Xamarin.Forms;
 
@@ -61,26 +62,37 @@ namespace Fourplaces.ViewModels
 
         public async void SignUp()
         {
-            /*if (Email.Length <= 0)
+            if (CrossConnectivity.Current.IsConnected)
             {
-                await Application.Current.MainPage.DisplayAlert("Erreur", "Email non valide !", "ok", "Cancel");
-            }*/
-            RegisterRequest request = new RegisterRequest
-            {
-                Email = Email,
-                FirstName = FirstName,
-                LastName = LastName,
-                Password = Password
-            };
-            Response<LoginResult> registerResult = await _pService.PostRegister(request);
-            if (registerResult.IsSuccess)
-            {
-                await Application.Current.MainPage.DisplayAlert("Inscription", "L'inscription a bien été effectuée!", "Ok");
-                await _navigation.PopToRootAsync();
+                if (string.IsNullOrEmpty(Email) || string.IsNullOrEmpty(FirstName) || string.IsNullOrEmpty(LastName) || string.IsNullOrEmpty(Password))
+                {
+                    await Application.Current.MainPage.DisplayAlert("Erreur", "Champs vides !", "Ok");
+                }
+                else
+                {
+                    RegisterRequest request = new RegisterRequest
+                    {
+                        Email = Email,
+                        FirstName = FirstName,
+                        LastName = LastName,
+                        Password = Password
+                    };
+                    Response<LoginResult> registerResult = await _pService.PostRegister(request);
+                    if (registerResult.IsSuccess)
+                    {
+                        await Application.Current.MainPage.DisplayAlert("Inscription", "L'inscription a bien été effectuée!", "Ok");
+                        await _navigation.PopToRootAsync();
+                    }
+                    else
+                    {
+                        await Application.Current.MainPage.DisplayAlert("Erreur", registerResult.ErrorMessage, "Ok");
+                    }
+                }
             }
             else
             {
-                await Application.Current.MainPage.DisplayAlert("Erreur", registerResult.ErrorMessage, "Ok");
+                await Application.Current.MainPage.DisplayAlert("Erreur",
+                    "Une connexion internet est nécessaire pour s'inscrire.", "Ok");
             }
         }
 

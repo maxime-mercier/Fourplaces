@@ -2,6 +2,7 @@
 using System.Windows.Input;
 using Fourplaces.Model;
 using Fourplaces.Services;
+using Plugin.Connectivity;
 using Plugin.Media;
 using Plugin.Media.Abstractions;
 using Storm.Mvvm;
@@ -11,7 +12,6 @@ namespace Fourplaces.ViewModels
 {
     class ModifyUserViewModel : ViewModelBase
     {
-
         private readonly INavigation _navigation;
 
         private readonly IPlaceService _pService = App.PService;
@@ -103,65 +103,98 @@ namespace Fourplaces.ViewModels
 
         private async void AddImage()
         {
-            MediaFile file = await CrossMedia.Current.PickPhotoAsync();
-            if (file != null)
+            if (CrossConnectivity.Current.IsConnected)
             {
-                Response<ImageItem> res = await _pService.PostImage(file);
-                if (res.IsSuccess)
+                MediaFile file = await CrossMedia.Current.PickPhotoAsync();
+                if (file != null)
                 {
-                    await Application.Current.MainPage.DisplayAlert("Succès", "L'image a bien été ajoutée !", "Ok");
-                    _imageId = res.Data.Id;
+                    Response<ImageItem> res = await _pService.PostImage(file);
+                    if (res.IsSuccess)
+                    {
+                        await Application.Current.MainPage.DisplayAlert("Succès", "L'image a bien été ajoutée !", "Ok");
+                        _imageId = res.Data.Id;
+                    }
+                    else
+                    {
+                        await Application.Current.MainPage.DisplayAlert("Erreur", res.ErrorMessage, "Ok");
+                    }
                 }
-                else
-                {
-                    await Application.Current.MainPage.DisplayAlert("Erreur", res.ErrorMessage, "Ok");
-                }
+            }
+            else
+            {
+                await Application.Current.MainPage.DisplayAlert("Erreur",
+                    "Une connexion internet est nécessaire pour ajouter l'image.", "Ok");
             }
         }
 
         private async void ChangePassword()
         {
-            if (String.IsNullOrEmpty(OldPassword) || String.IsNullOrEmpty(NewPassword))
+            if (CrossConnectivity.Current.IsConnected)
             {
-                await Application.Current.MainPage.DisplayAlert("Erreur", "Champs vides !", "Ok");
-            }
-            else
-            {
-                UpdatePasswordRequest updatePasswordRequest = new UpdatePasswordRequest()
+                if (string.IsNullOrEmpty(OldPassword) || string.IsNullOrEmpty(NewPassword))
                 {
-                    NewPassword = NewPassword,
-                    OldPassword = OldPassword
-                };
-                Response res = await _pService.PatchPassword(updatePasswordRequest);
-                if (res.IsSuccess)
-                {
-                    await Application.Current.MainPage.DisplayAlert("Modification", "Votre mot de passe a bien été modifié !", "Ok");
-                    await _navigation.PopAsync();
+                    await Application.Current.MainPage.DisplayAlert("Erreur", "Champs vides !", "Ok");
                 }
                 else
                 {
-                    await Application.Current.MainPage.DisplayAlert("Erreur", res.ErrorMessage, "Ok");
+                    UpdatePasswordRequest updatePasswordRequest = new UpdatePasswordRequest()
+                    {
+                        NewPassword = NewPassword,
+                        OldPassword = OldPassword
+                    };
+                    Response res = await _pService.PatchPassword(updatePasswordRequest);
+                    if (res.IsSuccess)
+                    {
+                        await Application.Current.MainPage.DisplayAlert("Modification",
+                            "Votre mot de passe a bien été modifié !", "Ok");
+                        await _navigation.PopAsync();
+                    }
+                    else
+                    {
+                        await Application.Current.MainPage.DisplayAlert("Erreur", res.ErrorMessage, "Ok");
+                    }
                 }
+            }
+            else
+            {
+                await Application.Current.MainPage.DisplayAlert("Erreur",
+                    "Une connexion internet est nécessaire pour modifier votre mot de passe.", "Ok");
             }
         }
 
         private async void ModifyUser()
         {
-            UpdateProfileRequest request = new UpdateProfileRequest()
+            if (CrossConnectivity.Current.IsConnected)
             {
-                ImageId = _imageId,
-                FirstName = NewFirstName,
-                LastName = NewLastName,
-            };
-            Response<UserItem> res = await _pService.PatchProfile(request);
-            if (res.IsSuccess)
-            {
-                await Application.Current.MainPage.DisplayAlert("Modification", "Votre profil a bien été modifié !", "Ok");
-                await _navigation.PopAsync();
+                if (string.IsNullOrEmpty(NewFirstName) || string.IsNullOrEmpty(NewLastName))
+                {
+                    await Application.Current.MainPage.DisplayAlert("Erreur", "Champs vides !", "Ok");
+                }
+                else
+                {
+                    UpdateProfileRequest request = new UpdateProfileRequest()
+                    {
+                        ImageId = _imageId,
+                        FirstName = NewFirstName,
+                        LastName = NewLastName,
+                    };
+                    Response<UserItem> res = await _pService.PatchProfile(request);
+                    if (res.IsSuccess)
+                    {
+                        await Application.Current.MainPage.DisplayAlert("Modification", "Votre profil a bien été modifié !",
+                            "Ok");
+                        await _navigation.PopAsync();
+                    }
+                    else
+                    {
+                        await Application.Current.MainPage.DisplayAlert("Erreur", res.ErrorMessage, "Ok");
+                    }
+                }
             }
             else
             {
-                await Application.Current.MainPage.DisplayAlert("Erreur", res.ErrorMessage, "Ok");
+                await Application.Current.MainPage.DisplayAlert("Erreur",
+                    "Une connexion internet est nécessaire pour modifier profil.", "Ok");
             }
         }
     }

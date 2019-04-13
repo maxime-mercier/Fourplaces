@@ -7,6 +7,8 @@ using System.Windows.Input;
 using Fourplaces.Model;
 using Fourplaces.Pages;
 using Fourplaces.Services;
+using MonkeyCache.SQLite;
+using Plugin.Connectivity;
 using Plugin.Media;
 using Storm.Mvvm;
 using Xamarin.Forms;
@@ -25,13 +27,15 @@ namespace Fourplaces.ViewModels
 
         private readonly INavigation _navigation;
 
+        private readonly string _cacheUrl = "placeListCache";
+
         public PlaceItemSummary SelectedPlace
         {
             get => _selectedPlace;
             set
             {
                 _selectedPlace = value;
-                GoToDetailPage();
+                GoToDetailPage(_selectedPlace.Id);
             }
         }
 
@@ -65,13 +69,13 @@ namespace Fourplaces.ViewModels
 
         private async void GoToAddPlacePage()
         {
-            throw new NotImplementedException();
+            await _navigation.PushAsync(new AddPlacePage());
         }
 
 
-        public async void GoToDetailPage()
+        public async void GoToDetailPage(int selectedPlaceId)
         {
-            await _navigation.PushAsync(new PageDetail(SelectedPlace));
+            await _navigation.PushAsync(new PageDetail(selectedPlaceId));
         }
 
         public async void GoToUserPage()
@@ -82,21 +86,29 @@ namespace Fourplaces.ViewModels
         public override async Task OnResume()
         {
             await base.OnResume();
-
-            Response<List<PlaceItemSummary>> PlacesResponse = await _pService.GetPlaces();
-            if (PlacesResponse.IsSuccess)
+            if (!CrossConnectivity.Current.IsConnected)
             {
-                Places.Clear();
-                foreach (PlaceItemSummary item in PlacesResponse.Data)
-                {
-                    Places.Add(item);
-                }
+                Places = Barrel.Current.Get<ObservableCollection<PlaceItemSummary>>(_cacheUrl);
             }
             else
-
             {
-                Console.WriteLine(PlacesResponse.ErrorMessage);
+                Response<List<PlaceItemSummary>> placesResponse = await _pService.GetPlaces();
+                if (placesResponse.IsSuccess)
+                {
+                    Places.Clear();
+                    foreach (PlaceItemSummary item in placesResponse.Data)
+                    {
+                        Places.Add(item);
+                    }
+                    Barrel.Current.Add(_cacheUrl, Places, TimeSpan.FromHours(1));
+                }
+                else
+                {
+                    await Application.Current.MainPage.DisplayAlert("Erreur", placesResponse.ErrorMessage, "Ok");
+                }
             }
         }
+
+        
     }
 }
