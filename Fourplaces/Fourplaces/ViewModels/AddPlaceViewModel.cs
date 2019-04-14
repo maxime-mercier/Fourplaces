@@ -12,6 +12,8 @@ using Plugin.Geolocator;
 using Plugin.Geolocator.Abstractions;
 using Plugin.Media;
 using Plugin.Media.Abstractions;
+using Plugin.Permissions;
+using Plugin.Permissions.Abstractions;
 using Storm.Mvvm;
 using Xamarin.Forms;
 
@@ -81,28 +83,98 @@ namespace Fourplaces.ViewModels
 
         private int _imageId;
 
+        private bool _buttonEnabled;
+
+        public bool ButtonEnabled
+        {
+            get => _buttonEnabled;
+            set => SetProperty(ref _buttonEnabled, value);
+        }
+
         public AddPlaceViewModel(INavigation navigation)
         {
             _navigation = navigation;
             AddImageCommand = new Command(PickPicture);
             TakePictureCommand = new Command(TakePhoto);
-
             AddPlaceCommand = new Command(AddPlace);
             _imageId = -1;
+            ButtonEnabled = true;
         }
 
-        private void TakePhoto()
+        private async void TakePhoto()
         {
-            AddImage(true);
+            ButtonEnabled = false;
+            if (CrossConnectivity.Current.IsConnected)
+            {
+                try
+                {
+                    await CrossMedia.Current.Initialize();
+
+                    if (!CrossMedia.Current.IsCameraAvailable || !CrossMedia.Current.IsTakePhotoSupported)
+                    {
+                        await Application.Current.MainPage.DisplayAlert("Pas d'appareil photo",
+                            "Pas d'appareil photo disponible.", "OK");
+                        return;
+                    }
+
+                    var file = await CrossMedia.Current.TakePhotoAsync(new StoreCameraMediaOptions
+                    {
+                        Directory = "Sample",
+                        Name = "test.jpg",
+                        PhotoSize = PhotoSize.Small
+                    });
+                    AddImage(file);
+                }
+                catch (MediaPermissionException)
+                {
+                    await Application.Current.MainPage.DisplayAlert("Erreur",
+                        "L'autorisation d'accès au stockage est requise pour ajouter une image.", "OK");
+                }
+            }
+            else
+            {
+                await Application.Current.MainPage.DisplayAlert("Erreur",
+                    "Une connexion internet est nécessaire pour ajouter l'image.", "Ok");
+            }
+            ButtonEnabled = true;
         }
 
-        private void PickPicture()
+        private async void PickPicture()
         {
-            AddImage(false);
+            ButtonEnabled = false;
+            if (CrossConnectivity.Current.IsConnected)
+            {
+                try
+                {
+                    if (!CrossMedia.Current.IsPickPhotoSupported)
+                    {
+                        await Application.Current.MainPage.DisplayAlert("Erreur",
+                            "Impossible d'accéder à la galerie", "OK");
+                        return;
+                    }
+
+                    var file = await CrossMedia.Current.PickPhotoAsync();
+                    AddImage(file);
+                }
+                catch (MediaPermissionException)
+                {
+                    await Application.Current.MainPage.DisplayAlert("Erreur",
+                        "L'autorisation d'accès au stockage est requise pour ajouter une image.", "OK");
+                }
+            }
+            else
+            {
+                await Application.Current.MainPage.DisplayAlert("Erreur",
+                    "Une connexion internet est nécessaire pour ajouter l'image.", "Ok");
+            }
+
+            ButtonEnabled = true;
         }
+
 
         private async void AddPlace()
         {
+            ButtonEnabled = false;
             if (CrossConnectivity.Current.IsConnected)
             {
                 if (_imageId != -1)
@@ -114,24 +186,32 @@ namespace Fourplaces.ViewModels
                     }
                     else
                     {
-                        CreatePlaceRequest request = new CreatePlaceRequest()
+                        try
                         {
-                            ImageId = _imageId,
-                            Description = Description,
-                            Title = Title,
-                            Latitude = Convert.ToDouble(Latitude),
-                            Longitude = Convert.ToDouble(Longitude)
-                        };
-                        Response res = await _pService.PostPlace(request);
-                        if (res.IsSuccess)
-                        {
-                            await Application.Current.MainPage.DisplayAlert("Succès", "Le lieu a bien été ajouté !",
-                                "Ok");
-                            await _navigation.PopAsync();
+                            CreatePlaceRequest request = new CreatePlaceRequest()
+                            {
+                                ImageId = _imageId,
+                                Description = Description,
+                                Title = Title,
+                                Latitude = Convert.ToDouble(Latitude, CultureInfo.InvariantCulture),
+                                Longitude = Convert.ToDouble(Longitude, CultureInfo.InvariantCulture)
+                            };
+                            Response res = await _pService.PostPlace(request);
+                            if (res.IsSuccess)
+                            {
+                                await Application.Current.MainPage.DisplayAlert("Succès", "Le lieu a bien été ajouté !",
+                                    "Ok");
+                                await _navigation.PopAsync();
+                            }
+                            else
+                            {
+                                await Application.Current.MainPage.DisplayAlert("Erreur", res.ErrorMessage, "Ok");
+                            }
                         }
-                        else
+                        catch (FormatException e)
                         {
-                            await Application.Current.MainPage.DisplayAlert("Erreur", res.ErrorMessage, "Ok");
+                            await Application.Current.MainPage.DisplayAlert("Erreur",
+                                "Latitude ou longitude non valide.", "Ok");
                         }
                     }
                 }
@@ -143,68 +223,32 @@ namespace Fourplaces.ViewModels
 
             else
             {
-                await Application.Current.MainPage.DisplayAlert("Erreur", "Une connexion internet est nécessaire pour ajouter un lieu", "Ok");
+                await Application.Current.MainPage.DisplayAlert("Erreur",
+                    "Une connexion internet est nécessaire pour ajouter un lieu", "Ok");
             }
-        }
 
-        public bool IsLocationAvailable()
-        {
-            if (!CrossGeolocator.IsSupported)
-                return false;
-
-            return CrossGeolocator.Current.IsGeolocationAvailable;
+            ButtonEnabled = true;
         }
 
 
-        private async void AddImage(bool takePicture)
+        private async void AddImage(MediaFile file)
         {
-            if (CrossConnectivity.Current.IsConnected)
+            if (file != null)
             {
-                MediaFile file;
-                if (takePicture)
+                Response<ImageItem> res = await _pService.PostImage(file);
+                if (res.IsSuccess)
                 {
-                    await CrossMedia.Current.Initialize();
-
-                    if (!CrossMedia.Current.IsCameraAvailable || !CrossMedia.Current.IsTakePhotoSupported)
-                    {
-                        await Application.Current.MainPage.DisplayAlert("Pas d'appareil photo",
-                            "Pas d'appareil photo disponible.", "OK");
-                        return;
-                    }
-
-                    file = await CrossMedia.Current.TakePhotoAsync(new StoreCameraMediaOptions
-                    {
-                        Directory = "Sample",
-                        Name = "test.jpg",
-                        PhotoSize = PhotoSize.Small
-                    });
+                    await Application.Current.MainPage.DisplayAlert("Succès", "L'image a bien été ajoutée !", "Ok");
+                    _imageId = res.Data.Id;
                 }
                 else
                 {
-                    file = await CrossMedia.Current.PickPhotoAsync();
-                }
-
-                if (file != null)
-                {
-                    Response<ImageItem> res = await _pService.PostImage(file);
-                    if (res.IsSuccess)
-                    {
-                        await Application.Current.MainPage.DisplayAlert("Succès", "L'image a bien été ajoutée !", "Ok");
-                        _imageId = res.Data.Id;
-                    }
-                    else
-                    {
-                        await Application.Current.MainPage.DisplayAlert("Erreur", res.ErrorMessage, "Ok");
-                    }
-                }
-                else
-                {
-                    await Application.Current.MainPage.DisplayAlert("Erreur", "Impossible d'ajouter l'image", "Ok");
+                    await Application.Current.MainPage.DisplayAlert("Erreur", res.ErrorMessage, "Ok");
                 }
             }
             else
             {
-                await Application.Current.MainPage.DisplayAlert("Erreur", "Une connexion internet est nécessaire pour ajouter l'image.", "Ok");
+                await Application.Current.MainPage.DisplayAlert("Erreur", "Impossible d'ajouter l'image", "Ok");
             }
         }
 
@@ -215,33 +259,42 @@ namespace Fourplaces.ViewModels
             {
                 var locator = CrossGeolocator.Current;
                 locator.DesiredAccuracy = 100;
-                if (!locator.IsGeolocationAvailable || !locator.IsGeolocationEnabled)
-                {
-                    return null;
-                }
-
-                position = await locator.GetPositionAsync(TimeSpan.FromSeconds(20), null, true);
+                var status = await IsLocationAvailable();
+                if (status == PermissionStatus.Granted)
+                    position = await locator.GetPositionAsync(TimeSpan.FromSeconds(20), null, true);
             }
             catch (Exception ex)
             {
                 Debug.WriteLine("Unable to get location: " + ex);
             }
 
-            if (position == null)
-                return null;
-
-            var output =
-                $"Time: {position.Timestamp} \nLat: {position.Latitude} \nLong: {position.Longitude} \nAltitude: {position.Altitude} \nAltitude Accuracy: {position.AltitudeAccuracy} \nAccuracy: {position.Accuracy} \nHeading: {position.Heading} \nSpeed: {position.Speed}";
-
-            Debug.WriteLine(output);
-
             return position;
+        }
+
+        private async Task<PermissionStatus> IsLocationAvailable()
+        {
+            var status = await CrossPermissions.Current.CheckPermissionStatusAsync(Permission.Location);
+            if (status != PermissionStatus.Granted)
+            {
+                if (await CrossPermissions.Current.ShouldShowRequestPermissionRationaleAsync(Permission.Location))
+                {
+                    await Application.Current.MainPage.DisplayAlert("Localisation",
+                        "La localisation est nécessaire pour afficher la position du lieu.", "Ok");
+                }
+
+                var results = await CrossPermissions.Current.RequestPermissionsAsync(Permission.Location);
+                //Best practice to always check that the key exists
+                if (results.ContainsKey(Permission.Location))
+                    status = results[Permission.Location];
+            }
+
+            return status;
         }
 
         public override async Task OnResume()
         {
             Position pos = await GetCurrentLocation();
-            if (pos != null)
+            if (pos != null && string.IsNullOrEmpty(Latitude) && string.IsNullOrEmpty(Longitude))
             {
                 Latitude = pos.Latitude.ToString(CultureInfo.InvariantCulture);
                 Longitude = pos.Longitude.ToString(CultureInfo.InvariantCulture);

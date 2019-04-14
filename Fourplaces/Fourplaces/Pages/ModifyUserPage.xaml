@@ -5,15 +5,15 @@
     <ContentPage.Content>
         <StackLayout>
             <StackLayout Orientation="Vertical" IsVisible="{Binding ModifyUserInfo}">
-                <Button Text="Ajouter une nouvelle image de profil" Command="{Binding AddImageCommand}"/>
+                <Button Text="Ajouter une nouvelle image de profil" Command="{Binding AddImageCommand}" IsEnabled="{Binding ButtonEnabled}"/>
                 <Entry Placeholder="Nouveau prenom" Text="{Binding NewFirstName}"/>
                 <Entry Placeholder="Nouveau nom" Text="{Binding NewLastName}"/>
-                <Button Text="Modifier" Command="{Binding ModifyUserCommand}"/>
+                <Button Text="Modifier" Command="{Binding ModifyUserCommand}" IsEnabled="{Binding ButtonEnabled}"/>
             </StackLayout>
             <StackLayout Orientation="Vertical" IsVisible="{Binding ModifyPassword}">
                 <Entry Placeholder="Ancien mot de passe" Text="{Binding OldPassword}"/>
                 <Entry Placeholder="Nouveau mot de passe" Text="{Binding NewPassword}"/>
-                <Button Text="Modifier mon mot de passe" Command="{Binding ModifyPasswordCommand}"/>
+                <Button Text="Modifier mon mot de passe" Command="{Binding ModifyPasswordCommand}" IsEnabled="{Binding ButtonEnabled}"/>
             </StackLayout>
         </StackLayout>
     </ContentPage.Content>

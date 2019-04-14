@@ -4,6 +4,7 @@ using System.Windows.Input;
 using Fourplaces.Model;
 using Fourplaces.Pages;
 using Fourplaces.Services;
+using MonkeyCache.SQLite;
 using Plugin.Connectivity;
 using Storm.Mvvm;
 using Xamarin.Forms;
@@ -75,11 +76,7 @@ namespace Fourplaces.ViewModels
                     Response<LoginResult> registerResult = await _pService.PostLogin(request);
                     if (registerResult.IsSuccess)
                     {
-                        //Disable button pour empecher d'ouvrir plusieurs pages 
-
-                        //var access = _pService.AccessToken;
                         await Application.Current.MainPage.DisplayAlert("Connexion", "La connexion a bien été effectuée!", "Ok");
-                        var test = _navigation.NavigationStack.Count;
                         List<Page> existingPages = _navigation.NavigationStack.ToList();
                         _navigation.InsertPageBefore(new PlaceListPage(), existingPages[0]);
                         await _navigation.PopToRootAsync();

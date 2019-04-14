@@ -35,15 +35,25 @@ namespace Fourplaces.ViewModels
 
         private readonly IPlaceService _pService = App.PService;
 
-        public AddCommentViewModel(int placeID, INavigation navigation)
+        private bool _buttonEnabled;
+
+        public bool ButtonEnabled
+        {
+            get => _buttonEnabled;
+            set => SetProperty(ref _buttonEnabled, value);
+        }
+
+        public AddCommentViewModel(int placeId, INavigation navigation)
         {
             PostCommentCommand = new Command(PostComment);
-            _placeId = placeID;
+            _placeId = placeId;
             _navigation = navigation;
+            ButtonEnabled = true;
         }
 
         private async void PostComment()
         {
+            ButtonEnabled = false;
             if (CrossConnectivity.Current.IsConnected)
             {
                 if (string.IsNullOrEmpty(Comment))
@@ -69,6 +79,8 @@ namespace Fourplaces.ViewModels
             {
                 await Application.Current.MainPage.DisplayAlert("Erreur", "Une connexion internet est nécessaire pour ajouter un commentaire.", "Ok");
             }
+
+            ButtonEnabled = true;
         }
     }
 }

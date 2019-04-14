@@ -90,6 +90,14 @@ namespace Fourplaces.ViewModels
 
         private int? _imageId;
 
+        private bool _buttonEnabled;
+
+        public bool ButtonEnabled
+        {
+            get => _buttonEnabled;
+            set => SetProperty(ref _buttonEnabled, value);
+        }
+
         public ModifyUserViewModel(bool isModifyPasswordPage, INavigation navigation)
         {
             _navigation = navigation;
@@ -99,25 +107,35 @@ namespace Fourplaces.ViewModels
             ModifyUserCommand = new Command(ModifyUser);
             ModifyPasswordCommand = new Command(ChangePassword);
             AddImageCommand = new Command(AddImage);
+            ButtonEnabled = true;
         }
 
         private async void AddImage()
         {
+            ButtonEnabled = false;
             if (CrossConnectivity.Current.IsConnected)
             {
-                MediaFile file = await CrossMedia.Current.PickPhotoAsync();
-                if (file != null)
+                try
                 {
-                    Response<ImageItem> res = await _pService.PostImage(file);
-                    if (res.IsSuccess)
+                    MediaFile file = await CrossMedia.Current.PickPhotoAsync();
+                    if (file != null)
                     {
-                        await Application.Current.MainPage.DisplayAlert("Succès", "L'image a bien été ajoutée !", "Ok");
-                        _imageId = res.Data.Id;
+                        Response<ImageItem> res = await _pService.PostImage(file);
+                        if (res.IsSuccess)
+                        {
+                            await Application.Current.MainPage.DisplayAlert("Succès", "L'image a bien été ajoutée !", "Ok");
+                            _imageId = res.Data.Id;
+                        }
+                        else
+                        {
+                            await Application.Current.MainPage.DisplayAlert("Erreur", res.ErrorMessage, "Ok");
+                        }
                     }
-                    else
-                    {
-                        await Application.Current.MainPage.DisplayAlert("Erreur", res.ErrorMessage, "Ok");
-                    }
+                }
+                catch (MediaPermissionException)
+                {
+                    await Application.Current.MainPage.DisplayAlert("Erreur",
+                        "L'autorisation d'accès au stockage est requise pour ajouter une image.", "OK");
                 }
             }
             else
@@ -125,10 +143,13 @@ namespace Fourplaces.ViewModels
                 await Application.Current.MainPage.DisplayAlert("Erreur",
                     "Une connexion internet est nécessaire pour ajouter l'image.", "Ok");
             }
+
+            ButtonEnabled = true;
         }
 
         private async void ChangePassword()
         {
+            ButtonEnabled = false;
             if (CrossConnectivity.Current.IsConnected)
             {
                 if (string.IsNullOrEmpty(OldPassword) || string.IsNullOrEmpty(NewPassword))
@@ -160,10 +181,13 @@ namespace Fourplaces.ViewModels
                 await Application.Current.MainPage.DisplayAlert("Erreur",
                     "Une connexion internet est nécessaire pour modifier votre mot de passe.", "Ok");
             }
+
+            ButtonEnabled = true;
         }
 
         private async void ModifyUser()
         {
+            ButtonEnabled = true;
             if (CrossConnectivity.Current.IsConnected)
             {
                 if (string.IsNullOrEmpty(NewFirstName) || string.IsNullOrEmpty(NewLastName))
@@ -196,6 +220,8 @@ namespace Fourplaces.ViewModels
                 await Application.Current.MainPage.DisplayAlert("Erreur",
                     "Une connexion internet est nécessaire pour modifier profil.", "Ok");
             }
+
+            ButtonEnabled = true;
         }
     }
 }

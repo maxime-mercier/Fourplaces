@@ -8,7 +8,7 @@
             <Entry Placeholder="Prénom" Text="{Binding FirstName}"/>
             <Entry Placeholder="Nom" Text="{Binding LastName}"/>
             <Entry Placeholder="Mot de passe" IsPassword="True" Text="{Binding Password}"/>
-            <Button Text="S'inscrire" Command="{Binding SignUpCommand}"/>
+            <Button Text="S'inscrire" Command="{Binding SignUpCommand}" IsEnabled="{Binding SignUpButtonEnabled}"/>
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>

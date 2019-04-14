@@ -14,6 +14,14 @@ namespace Fourplaces.ViewModels
 
         private readonly IPlaceService _pService = App.PService;
 
+        private bool _signUpButtonEnabled;
+
+        public bool SignUpButtonEnabled
+        {
+            get => _signUpButtonEnabled;
+            set => SetProperty(ref _signUpButtonEnabled, value);
+        }
+
         private string _email;
 
         public string Email
@@ -58,10 +66,12 @@ namespace Fourplaces.ViewModels
         {
             _navigation = navigation;
             SignUpCommand = new Command(SignUp);
+            SignUpButtonEnabled = true;
         }
 
         public async void SignUp()
         {
+            SignUpButtonEnabled = false;
             if (CrossConnectivity.Current.IsConnected)
             {
                 if (string.IsNullOrEmpty(Email) || string.IsNullOrEmpty(FirstName) || string.IsNullOrEmpty(LastName) || string.IsNullOrEmpty(Password))
@@ -94,6 +104,8 @@ namespace Fourplaces.ViewModels
                 await Application.Current.MainPage.DisplayAlert("Erreur",
                     "Une connexion internet est nécessaire pour s'inscrire.", "Ok");
             }
+
+            SignUpButtonEnabled = true;
         }
 
     }

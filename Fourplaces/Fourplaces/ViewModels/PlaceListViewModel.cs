@@ -17,17 +17,11 @@ namespace Fourplaces.ViewModels
 {
     class PlaceListViewModel : ViewModelBase
     {
-        //private readonly INavigationService _navigationService;
-
         public ObservableCollection<PlaceItemSummary> Places { get; set; }
 
         private PlaceItemSummary _selectedPlace;
 
-        //public INavigationService _navigation { get; set;}
-
         private readonly INavigation _navigation;
-
-        private readonly string _cacheUrl = "placeListCache";
 
         public PlaceItemSummary SelectedPlace
         {
@@ -88,7 +82,22 @@ namespace Fourplaces.ViewModels
             await base.OnResume();
             if (!CrossConnectivity.Current.IsConnected)
             {
-                Places = Barrel.Current.Get<ObservableCollection<PlaceItemSummary>>(_cacheUrl);
+                if (!Barrel.Current.IsExpired(App.PlaceListCacheUrl))
+                {
+                    var list = Barrel.Current.Get<List<PlaceItemSummary>>(App.PlaceListCacheUrl);
+                    Places.Clear();
+                    foreach (PlaceItemSummary item in list)
+                    {
+                        Places.Add(item);
+                    }
+                }
+                else
+                {
+                    Places.Clear();
+                    Barrel.Current.Empty(key: App.PlaceListCacheUrl);
+                    await Application.Current.MainPage.DisplayAlert("Erreur",
+                        "Impossible d'afficher la liste de lieux !", "Ok");
+                }
             }
             else
             {
@@ -100,7 +109,8 @@ namespace Fourplaces.ViewModels
                     {
                         Places.Add(item);
                     }
-                    Barrel.Current.Add(_cacheUrl, Places, TimeSpan.FromHours(1));
+
+                    Barrel.Current.Add(App.PlaceListCacheUrl, placesResponse.Data, TimeSpan.FromHours(1));
                 }
                 else
                 {
@@ -108,7 +118,5 @@ namespace Fourplaces.ViewModels
                 }
             }
         }
-
-        
     }
 }

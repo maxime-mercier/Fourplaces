@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Runtime.ConstrainedExecution;
 using System.Text;
 using System.Threading.Tasks;
 using Fourplaces.Model;
@@ -67,7 +65,7 @@ namespace Fourplaces.Services
                     }
 
                     HttpResponseMessage responseMessage = await client.SendAsync(requestMessage);
-                    responseMessage.EnsureSuccessStatusCode();
+                    //responseMessage.EnsureSuccessStatusCode();
                     return await responseMessage.Content.ReadAsStringAsync();
                 }
             }
@@ -82,7 +80,7 @@ namespace Fourplaces.Services
                 var responseBody = await GenericHttpRequest<object>(uri, "GET", true, null);
                 return JsonConvert.DeserializeObject<Response<List<PlaceItemSummary>>>(responseBody);
             }
-            catch (HttpRequestException e)
+            catch (Exception e)
             {
                 return new Response<List<PlaceItemSummary>>
                 {
@@ -94,24 +92,19 @@ namespace Fourplaces.Services
 
         public async Task<Response<PlaceItem>> GetPlace(int placeId)
         {
-            using (HttpClient client = new HttpClient())
+            try
             {
-                try
+                string uri = "https://td-api.julienmialon.com/places/" + placeId;
+                var responseBody = await GenericHttpRequest<object>(uri, "GET", true, null);
+                return JsonConvert.DeserializeObject<Response<PlaceItem>>(responseBody);
+            }
+            catch (Exception e)
+            {
+                return new Response<PlaceItem>
                 {
-                    HttpResponseMessage response =
-                        await client.GetAsync("https://td-api.julienmialon.com/places/" + placeId);
-                    response.EnsureSuccessStatusCode();
-                    var responseBody = await response.Content.ReadAsStringAsync();
-                    return JsonConvert.DeserializeObject<Response<PlaceItem>>(responseBody);
-                }
-                catch (HttpRequestException e)
-                {
-                    return new Response<PlaceItem>
-                    {
-                        IsSuccess = false,
-                        ErrorMessage = e.Message
-                    };
-                }
+                    IsSuccess = false,
+                    ErrorMessage = e.Message
+                };
             }
         }
 
@@ -138,7 +131,7 @@ namespace Fourplaces.Services
                     string result = await response.Content.ReadAsStringAsync();
                     return JsonConvert.DeserializeObject<Response<ImageItem>>(result);
                 }
-                catch (HttpRequestException e)
+                catch (Exception e)
                 {
                     return new Response<ImageItem>()
                     {
@@ -149,79 +142,64 @@ namespace Fourplaces.Services
             }
         }
 
-        public void GetImage(int id)
-        {
-            throw new NotImplementedException();
-        }
-
         public async Task<Response<LoginResult>> PostRegister(RegisterRequest request)
         {
-            using (HttpClient client = new HttpClient())
+            try
             {
-                try
+                string uri = "https://td-api.julienmialon.com/auth/register";
+                var responseBody = await GenericHttpRequest(uri, "POST", false, request);
+                return JsonConvert.DeserializeObject<Response<LoginResult>>(responseBody);
+            }
+            catch (Exception e)
+            {
+                return new Response<LoginResult>()
                 {
-                    var registerRequest = JsonConvert.SerializeObject(request);
-                    HttpResponseMessage response = await client.PostAsync(
-                        "https://td-api.julienmialon.com/auth/register",
-                        new StringContent(registerRequest, Encoding.UTF8, "application/json-patch+json"));
-                    var responseBody = await response.Content.ReadAsStringAsync();
-                    Response<LoginResult> res = JsonConvert.DeserializeObject<Response<LoginResult>>(responseBody);
-                    return res;
-                }
-                catch (HttpRequestException e)
-                {
-                    return new Response<LoginResult>()
-                    {
-                        IsSuccess = false,
-                        ErrorMessage = e.Message
-                    };
-                }
+                    IsSuccess = false,
+                    ErrorMessage = e.Message
+                };
             }
         }
 
         public async Task<Response<LoginResult>> PostLogin(LoginRequest request)
         {
-            using (HttpClient client = new HttpClient())
+            try
             {
-                try
+                string uri = "https://td-api.julienmialon.com/auth/login";
+                var responseBody = await GenericHttpRequest(uri, "POST", false, request);
+                Response<LoginResult> res = JsonConvert.DeserializeObject<Response<LoginResult>>(responseBody);
+                if (res.IsSuccess)
                 {
-                    var loginRequest = JsonConvert.SerializeObject(request);
-                    HttpResponseMessage response = await client.PostAsync("https://td-api.julienmialon.com/auth/login",
-                        new StringContent(loginRequest, Encoding.UTF8, "application/json-patch+json"));
-                    var responseBody = await response.Content.ReadAsStringAsync();
-                    Response<LoginResult> res = JsonConvert.DeserializeObject<Response<LoginResult>>(responseBody);
-                    if (res.IsSuccess)
-                    {
-                        AccessToken = res.Data.AccessToken;
-                        ExpiresIn = res.Data.ExpiresIn;
-                    }
+                    AccessToken = res.Data.AccessToken;
+                    ExpiresIn = res.Data.ExpiresIn;
+                }
 
-                    return res;
-                }
-                catch (HttpRequestException e)
+                return res;
+            }
+            catch (Exception e)
+            {
+                return new Response<LoginResult>()
                 {
-                    return new Response<LoginResult>()
-                    {
-                        IsSuccess = false,
-                        ErrorMessage = e.Message
-                    };
-                }
+                    IsSuccess = false,
+                    ErrorMessage = e.Message
+                };
             }
         }
 
         public async Task<Response> PostComment(CreateCommentRequest createCommentRequest, int placeId)
         {
-            using (HttpClient client = new HttpClient())
+            try
             {
-                var commentRequest = JsonConvert.SerializeObject(createCommentRequest);
-                client.DefaultRequestHeaders.Authorization =
-                    new AuthenticationHeaderValue(App.TokenScheme, AccessToken);
-                HttpResponseMessage response = await client.PostAsync(
-                    "https://td-api.julienmialon.com/places/" + placeId + "/comments",
-                    new StringContent(commentRequest, Encoding.UTF8, "application/json-patch+json"));
-                var responseBody = await response.Content.ReadAsStringAsync();
-                Response res = JsonConvert.DeserializeObject<Response>(responseBody);
-                return res;
+                string uri = "https://td-api.julienmialon.com/places/" + placeId + "/comments";
+                var responseBody = await GenericHttpRequest(uri, "POST", true, createCommentRequest);
+                return JsonConvert.DeserializeObject<Response>(responseBody);
+            }
+            catch (Exception e)
+            {
+                return new Response<LoginResult>()
+                {
+                    IsSuccess = false,
+                    ErrorMessage = e.Message
+                };
             }
         }
 
@@ -233,7 +211,7 @@ namespace Fourplaces.Services
                 var responseBody = await GenericHttpRequest<object>(uri, "GET", true, null);
                 return JsonConvert.DeserializeObject<Response<UserItem>>(responseBody);
             }
-            catch (HttpRequestException e)
+            catch (Exception e)
             {
                 return new Response<UserItem>
                 {
@@ -251,7 +229,7 @@ namespace Fourplaces.Services
                 var responseBody = await GenericHttpRequest(uri, "PATCH", true, updateProfileRequest);
                 return JsonConvert.DeserializeObject<Response<UserItem>>(responseBody);
             }
-            catch (HttpRequestException e)
+            catch (Exception e)
             {
                 return new Response<UserItem>
                 {
@@ -270,7 +248,7 @@ namespace Fourplaces.Services
                     await GenericHttpRequest(uri, "PATCH", true, updatePasswordRequest);
                 return JsonConvert.DeserializeObject<Response>(responseBody);
             }
-            catch (HttpRequestException e)
+            catch (Exception e)
             {
                 return new Response
                 {
@@ -289,7 +267,7 @@ namespace Fourplaces.Services
                     await GenericHttpRequest(uri, "POST", true, createPlaceRequest);
                 return JsonConvert.DeserializeObject<Response>(responseBody);
             }
-            catch (HttpRequestException e)
+            catch (Exception e)
             {
                 return new Response
                 {
@@ -298,32 +276,5 @@ namespace Fourplaces.Services
                 };
             }
         }
-
-        /* PATCH
-         * using (HttpClientHandler ClientHandler = new HttpClientHandler())
-                using (HttpClient Client = new HttpClient(ClientHandler))
-                {
-                    Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", API.UserConnection.access_token);
-                    using (HttpRequestMessage RequestMessage = new HttpRequestMessage(new HttpMethod("PATCH"), request))
-                    {
-                        RequestMessage.Content = new StringContent(body, Encoding.UTF8, "application/json");
-                        using (HttpResponseMessage ResponseMessage = await Client.SendAsync(RequestMessage))
-                        {
-                            string result = await ResponseMessage.Content.ReadAsStringAsync();
-
-                            if (ResponseMessage.StatusCode == HttpStatusCode.NoContent)
-                            {
-                                return true;
-                            }
-                            else
-                            {
-                                await Error.Send(ResponseMessage.StatusCode, request, result);
-                                return false;
-                            }
-                        }
-                    }
-                }
-         *
-         */
     }
 }

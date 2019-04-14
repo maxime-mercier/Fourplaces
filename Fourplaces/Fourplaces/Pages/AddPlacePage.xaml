@@ -5,13 +5,13 @@
              x:Class="Fourplaces.Pages.AddPlacePage">
     <forms:BaseContentPage.Content>
         <StackLayout>
-            <Button Text="Selectionner une image depuis la galerie" Command="{Binding AddImageCommand}"/>
-            <Button Text="Prendre une photo" Command="{Binding TakePictureCommand}"/>
+            <Button Text="Selectionner une image depuis la galerie" Command="{Binding AddImageCommand}" IsEnabled="{Binding ButtonEnabled}"/>
+            <Button Text="Prendre une photo" Command="{Binding TakePictureCommand}" IsEnabled="{Binding ButtonEnabled}"/>
             <Entry Text="{Binding Title}" Placeholder="Titre"/>
             <Editor Text="{Binding Description}" Placeholder="Description" AutoSize="TextChanges"/>
             <Entry Text="{Binding Latitude}" Placeholder="Latitude" Keyboard="Numeric"/>
             <Entry Text="{Binding Longitude}" Placeholder="Longitude" Keyboard="Numeric"/>
-            <Button Text="Ajouter le lieu" Command="{Binding AddPlaceCommand}"/>
+            <Button Text="Ajouter le lieu" Command="{Binding AddPlaceCommand}" IsEnabled="{Binding ButtonEnabled}"/>
         </StackLayout>
     </forms:BaseContentPage.Content>
 </forms:BaseContentPage>

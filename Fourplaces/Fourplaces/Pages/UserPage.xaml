@@ -10,8 +10,8 @@
                    HorizontalOptions="Center"/>
             <Label Text="{Binding Name}" 
                 HorizontalOptions="Center" Margin="5"/>
-            <Button Text="Modifier mon profil" Command="{Binding GoToUserNamePage}"/>
-            <Button Text="Modifier mon mot de passe" Command="{Binding GoToPasswordPageCommand}"/>
+            <Button Text="Modifier mon profil" Command="{Binding GoToUserNamePage}" IsEnabled="{Binding ButtonEnabled}"/>
+            <Button Text="Modifier mon mot de passe" Command="{Binding GoToPasswordPageCommand}" IsEnabled="{Binding ButtonEnabled}"/>
         </StackLayout>
     </forms:BaseContentPage.Content>
 </forms:BaseContentPage>

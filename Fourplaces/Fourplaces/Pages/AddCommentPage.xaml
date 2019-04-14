@@ -5,7 +5,7 @@
     <ContentPage.Content>
         <StackLayout Orientation="Vertical" VerticalOptions="CenterAndExpand">
             <Editor Text="{Binding Comment}" Placeholder="Commentaire" AutoSize="TextChanges"/>
-            <Button Text="Ajouter un commentaire" Command="{Binding PostCommentCommand}"/>
+            <Button Text="Ajouter un commentaire" Command="{Binding PostCommentCommand}" IsEnabled="{Binding ButtonEnabled}"/>
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>

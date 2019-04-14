@@ -4,8 +4,8 @@
              x:Class="Fourplaces.Pages.HomePage">
     <ContentPage.Content>
         <StackLayout Orientation="Vertical" VerticalOptions="CenterAndExpand">
-            <Button  Text="Connexion" Command="{Binding SignInCommand}"/>
-            <Button Text="Inscription" Command="{Binding SignUpCommand}"/>
+            <Button  Text="Connexion" Command="{Binding SignInCommand}" IsEnabled="{Binding ButtonEnabled}"/>
+            <Button Text="Inscription" Command="{Binding SignUpCommand}" IsEnabled="{Binding ButtonEnabled}"/>
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>

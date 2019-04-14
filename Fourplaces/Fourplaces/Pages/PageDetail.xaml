@@ -5,10 +5,10 @@
              xmlns:forms="clr-namespace:Storm.Mvvm.Forms;assembly=Storm.Mvvm.Forms"
              x:Class="Fourplaces.Pages.PageDetail">
     <ContentPage.Content>
-        <StackLayout Orientation="Vertical" VerticalOptions="FillAndExpand">
-            <maps:Map WidthRequest="700" HeightRequest="200" IsShowingUser="True" x:Name="MyMap" MapType="Hybrid" />
-            <Image Source="{Binding ImageSrc}"/>
-            <Label Text="{Binding Title}"/>
+        <StackLayout Orientation="Vertical" VerticalOptions="Fill">
+            <maps:Map WidthRequest="700" HeightRequest="180" IsShowingUser="False" x:Name="MyMap" MapType="Hybrid" />
+            <Image Source="{Binding ImageSrc}" HeightRequest="80"/>
+            <Label Text="{Binding Title}" HorizontalOptions="Center"/>
             <Label Text="{Binding Description}"/>
             <ListView ItemsSource="{Binding Comments}" >
                 <ListView.ItemTemplate>
@@ -17,7 +17,7 @@
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
-            <Button Text="Ajouter un commentaire" Command="{Binding AddCommentCommand}"/>
+            <Button Text="Ajouter un commentaire" Command="{Binding AddCommentCommand}" IsEnabled="{Binding ButtonEnabled}"/>
         </StackLayout>
     </ContentPage.Content>
 </forms:BaseContentPage>

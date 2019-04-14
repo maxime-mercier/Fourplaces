@@ -7,6 +7,8 @@ using Fourplaces.Pages;
 using Fourplaces.Services;
 using MonkeyCache.SQLite;
 using Plugin.Connectivity;
+using Plugin.Permissions;
+using Plugin.Permissions.Abstractions;
 using Storm.Mvvm;
 using Xamarin.Forms;
 using Xamarin.Forms.Maps;
@@ -41,16 +43,16 @@ namespace Fourplaces.ViewModels
 
         private string _title;
 
-        
-        public string Title {
+
+        public string Title
+        {
             get => _title;
             set => SetProperty(ref _title, value);
-
         }
 
         private string _description;
 
-        
+
         public string Description
         {
             get => _description;
@@ -58,7 +60,14 @@ namespace Fourplaces.ViewModels
         }
 
         private readonly IPlaceService _pService = App.PService;
-        private string _cacheUrl;
+
+        private bool _buttonEnabled;
+
+        public bool ButtonEnabled
+        {
+            get => _buttonEnabled;
+            set => SetProperty(ref _buttonEnabled, value);
+        }
 
         public PageDetailViewModel(int selectedPlaceId, Map myMap, INavigation navigation)
         {
@@ -67,15 +76,53 @@ namespace Fourplaces.ViewModels
             _navigation = navigation;
             Comments = new ObservableCollection<CommentItem>();
             AddCommentCommand = new Command(AddComment);
-            _cacheUrl = "placeDetailCache" + CurrentPlaceId;
+            ButtonEnabled = true;
         }
 
         private async void AddComment()
         {
+            ButtonEnabled = false;
             await _navigation.PushAsync(new AddCommentPage(CurrentPlaceId));
+            ButtonEnabled = true;
         }
 
+        private async Task<PermissionStatus> CheckLocationPermission()
+        {
+            var status = await CrossPermissions.Current.CheckPermissionStatusAsync(Permission.Location);
+            if (status != PermissionStatus.Granted)
+            {
+                if (await CrossPermissions.Current.ShouldShowRequestPermissionRationaleAsync(Permission.Location))
+                {
+                    await Application.Current.MainPage.DisplayAlert("Localisation",
+                        "La localisation est nécessaire pour afficher la position du lieu.", "Ok");
+                }
 
+                var results = await CrossPermissions.Current.RequestPermissionsAsync(Permission.Location);
+                if (results.ContainsKey(Permission.Location))
+                    status = results[Permission.Location];
+            }
+
+            return status;
+        }
+
+        private void SetPlace(PlaceItem place)
+        {
+            Description = place.Description;
+            Title = place.Title;
+            ImageSrc = "https://td-api.julienmialon.com/images/" + place.ImageId;
+            MyMap.MoveToRegion(MapSpan.FromCenterAndRadius(new Position(place.Latitude, place.Longitude),
+                Distance.FromKilometers(1)));
+            var pin = new Pin()
+            {
+                Position = new Position(place.Latitude, place.Longitude),
+                Label = place.Title
+            };
+            MyMap.Pins.Add(pin);
+            foreach (var comment in place.Comments)
+            {
+                Comments.Add(comment);
+            }
+        }
 
         public override async Task OnResume()
         {
@@ -83,7 +130,12 @@ namespace Fourplaces.ViewModels
             PlaceItem place = null;
             if (!CrossConnectivity.Current.IsConnected)
             {
-                place = Barrel.Current.Get<PlaceItem>(_cacheUrl);
+                if (!Barrel.Current.IsExpired(App.PlaceDetailCacheUrl + CurrentPlaceId))
+                    place = Barrel.Current.Get<PlaceItem>(App.PlaceDetailCacheUrl + CurrentPlaceId);
+                else
+                {
+                    Barrel.Current.Empty(key: App.PlaceDetailCacheUrl + CurrentPlaceId);
+                }
             }
             else
             {
@@ -91,35 +143,24 @@ namespace Fourplaces.ViewModels
                 if (placesResponse.IsSuccess)
                 {
                     place = placesResponse.Data;
-                    Barrel.Current.Add(_cacheUrl, place, TimeSpan.FromHours(1));
+                    Barrel.Current.Add(App.PlaceDetailCacheUrl + CurrentPlaceId, place, TimeSpan.FromHours(1));
                 }
                 else
 
                 {
                     await Application.Current.MainPage.DisplayAlert("Erreur", placesResponse.ErrorMessage, "Ok");
+                    await _navigation.PopAsync();
                 }
             }
 
             if (place != null)
             {
-                Description = place.Description;
-                Title = place.Title;
-                ImageSrc = "https://td-api.julienmialon.com/images" + place.ImageId;
-                MyMap.MoveToRegion(MapSpan.FromCenterAndRadius(new Position(place.Latitude, place.Longitude), Distance.FromKilometers(1)));
-                var pin = new Pin()
-                {
-                    Position = new Position(place.Latitude, place.Longitude),
-                    Label = place.Title
-                };
-                MyMap.Pins.Add(pin);
-                foreach (var comment in place.Comments)
-                {
-                    Comments.Add(comment);
-                }
+                SetPlace(place);
             }
             else
             {
-                await Application.Current.MainPage.DisplayAlert("Erreur", "Impossible d'accéder au détail du lieu sélectionné", "Ok");
+                await Application.Current.MainPage.DisplayAlert("Erreur",
+                    "Impossible d'accéder au détail du lieu sélectionné", "Ok");
                 await _navigation.PopAsync();
             }
         }

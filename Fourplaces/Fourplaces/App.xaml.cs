@@ -11,20 +11,18 @@ namespace Fourplaces
     public partial class App : Application
     {
         public static IPlaceService PService { get; } = new PlaceService();
-        public static string TokenScheme = "Bearer";
+        public static readonly string TokenScheme = "Bearer";
+        public static readonly string PlaceListCacheUrl = "placeListCache";
+        public static readonly string PlaceDetailCacheUrl = "placeDetailCache";
+        public static readonly string UserCacheUrl = "userCache";
 
         public App()
         {
             InitializeComponent();
-            /*NavigationService.Configure("MainPage", typeof(MainPage));
-            NavigationService.Configure("PageDetail", typeof(PageDetail));
-            var mainPage = ((ViewNavigationService)NavigationService).SetRootPage("MainPage");*/
             Barrel.ApplicationId = "Fourplaces";
             MainPage = new NavigationPage(new HomePage());
-            //MainPage = new MainPage();
         }
 
-        //public static INavigationService NavigationService { get; } = new ViewNavigationService();
 
         
 
@@ -42,5 +40,6 @@ namespace Fourplaces
         {
             // Handle when your app resumes
         }
+
     }
 }
