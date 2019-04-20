@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Fourplaces.Model;
@@ -57,6 +59,16 @@ namespace Fourplaces.ViewModels
             set => SetProperty(ref _goToPasswordPageCommand, value);
         }
 
+        private ICommand _disconnectCommand;
+
+        public ICommand DisconnectCommand
+        {
+            get => _disconnectCommand;
+            set => SetProperty(ref _disconnectCommand, value);
+        }
+
+        
+
         private bool _buttonEnabled;
 
         public bool ButtonEnabled
@@ -71,6 +83,20 @@ namespace Fourplaces.ViewModels
             UserImage = "userLogo.png";
             GoToUserNamePage = new Command(GoToModifyUserNamePage);
             GoToPasswordPageCommand = new Command(GoToPasswordPage);
+            DisconnectCommand = new Command(Disconnect);
+            ButtonEnabled = true;
+        }
+
+        private async void Disconnect()
+        {
+            ButtonEnabled = false;
+            Barrel.Current.Empty(key: App.UserCacheUrl);
+            Barrel.Current.EmptyExpired();
+            App.AccessToken = null;
+            App.RefreshToken = null;
+            List<Page> existingPages = _navigation.NavigationStack.ToList();
+            _navigation.InsertPageBefore(new HomePage(), existingPages[0]);
+            await _navigation.PopToRootAsync();
             ButtonEnabled = true;
         }
 
@@ -98,7 +124,7 @@ namespace Fourplaces.ViewModels
         public override async Task OnResume()
         {
             await base.OnResume();
-            var keys = Barrel.Current.GetKeys();
+            Barrel.Current.GetKeys();
             UserItem item = null;
             if (!CrossConnectivity.Current.IsConnected)
             {

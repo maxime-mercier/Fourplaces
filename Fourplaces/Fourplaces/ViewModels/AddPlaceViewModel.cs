@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Fourplaces.Model;
@@ -208,7 +206,7 @@ namespace Fourplaces.ViewModels
                                 await Application.Current.MainPage.DisplayAlert("Erreur", res.ErrorMessage, "Ok");
                             }
                         }
-                        catch (FormatException e)
+                        catch (FormatException)
                         {
                             await Application.Current.MainPage.DisplayAlert("Erreur",
                                 "Latitude ou longitude non valide.", "Ok");
@@ -283,7 +281,6 @@ namespace Fourplaces.ViewModels
                 }
 
                 var results = await CrossPermissions.Current.RequestPermissionsAsync(Permission.Location);
-                //Best practice to always check that the key exists
                 if (results.ContainsKey(Permission.Location))
                     status = results[Permission.Location];
             }

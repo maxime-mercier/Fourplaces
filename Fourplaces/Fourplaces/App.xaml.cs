@@ -11,6 +11,10 @@ namespace Fourplaces
     public partial class App : Application
     {
         public static IPlaceService PService { get; } = new PlaceService();
+        public static string AccessToken { get; set; }
+        public static string RefreshToken { get; set; }
+        public static int ExpiresIn { get; set; }
+        public static DateTime TokenTime { get; set; }
         public static readonly string TokenScheme = "Bearer";
         public static readonly string PlaceListCacheUrl = "placeListCache";
         public static readonly string PlaceDetailCacheUrl = "placeDetailCache";

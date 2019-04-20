@@ -14,6 +14,6 @@ namespace Fourplaces.Model
 		[JsonProperty("text")]
 		public string Text { get; set; }
 
-        public string CommentAuthorAndDate => $"{Author.FirstName}    {Date.ToShortDateString()} ";
+        public string CommentAuthorAndDate => $"{Author.FirstName} {Author.LastName}    {Date.ToShortDateString()}";
     }
 }

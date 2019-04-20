@@ -14,12 +14,6 @@ namespace Fourplaces.Services
 {
     public interface IPlaceService
     {
-        string AccessToken { get; }
-
-        string RefreshToken { get; }
-
-        int ExpiresIn { get; }
-
         Task<Response<List<PlaceItemSummary>>> GetPlaces();
 
         Task<Response<PlaceItem>> GetPlace(int placeId);
@@ -43,18 +37,45 @@ namespace Fourplaces.Services
 
     public class PlaceService : IPlaceService
     {
-        public string AccessToken { get; set; }
-        public string RefreshToken { get; }
-        public int ExpiresIn { get; set; }
 
+        private async void CheckToken()
+        {
+            if (App.AccessToken != null && App.RefreshToken != null)
+            {
+                if (DateTime.Now.Second - App.TokenTime.Second > App.ExpiresIn)
+                {
+                    string uri = "https://td-api.julienmialon.com/auth/refresh";
+                    RefreshRequest request = new RefreshRequest()
+                    {
+                        RefreshToken = App.RefreshToken
+                    };
+                    var responseBody = await GenericHttpRequest(uri, "POST", false, request);
+                    Response<LoginResult> res = JsonConvert.DeserializeObject<Response<LoginResult>>(responseBody);
+                    if (res.IsSuccess)
+                    {
+                        App.AccessToken = res.Data.AccessToken;
+                        App.RefreshToken = res.Data.RefreshToken;
+                        App.ExpiresIn = res.Data.ExpiresIn;
+                        App.TokenTime = DateTime.Now;
+                        return;
+                    }
+                }
+                else
+                {
+                    return;
+                }
+            }
+            throw new Exception("Le jeton est expiré, vous devez vous reconnecter !");
+        }
 
         public async Task<string> GenericHttpRequest<T>(string uri, string httpRequestMethod, bool token, T content)
         {
             using (HttpClient client = new HttpClient())
             {
                 if (token)
+                    CheckToken();
                     client.DefaultRequestHeaders.Authorization =
-                        new AuthenticationHeaderValue(App.TokenScheme, AccessToken);
+                        new AuthenticationHeaderValue(App.TokenScheme, App.AccessToken);
                 using (HttpRequestMessage requestMessage =
                     new HttpRequestMessage(new HttpMethod(httpRequestMethod), uri))
                 {
@@ -65,7 +86,6 @@ namespace Fourplaces.Services
                     }
 
                     HttpResponseMessage responseMessage = await client.SendAsync(requestMessage);
-                    //responseMessage.EnsureSuccessStatusCode();
                     return await responseMessage.Content.ReadAsStringAsync();
                 }
             }
@@ -120,7 +140,7 @@ namespace Fourplaces.Services
                     HttpRequestMessage request =
                         new HttpRequestMessage(HttpMethod.Post, "https://td-api.julienmialon.com/images");
                     request.Headers.Authorization =
-                        new AuthenticationHeaderValue(App.TokenScheme, AccessToken);
+                        new AuthenticationHeaderValue(App.TokenScheme, App.AccessToken);
                     MultipartFormDataContent requestContent = new MultipartFormDataContent();
                     var imageContent = new ByteArrayContent(imageData);
                     imageContent.Headers.ContentType = MediaTypeHeaderValue.Parse("image/jpeg");
@@ -169,8 +189,10 @@ namespace Fourplaces.Services
                 Response<LoginResult> res = JsonConvert.DeserializeObject<Response<LoginResult>>(responseBody);
                 if (res.IsSuccess)
                 {
-                    AccessToken = res.Data.AccessToken;
-                    ExpiresIn = res.Data.ExpiresIn;
+                    App.AccessToken = res.Data.AccessToken;
+                    App.RefreshToken = res.Data.RefreshToken;
+                    App.ExpiresIn = res.Data.ExpiresIn;
+                    App.TokenTime = DateTime.Now;
                 }
 
                 return res;

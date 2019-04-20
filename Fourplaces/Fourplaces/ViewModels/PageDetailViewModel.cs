@@ -7,8 +7,6 @@ using Fourplaces.Pages;
 using Fourplaces.Services;
 using MonkeyCache.SQLite;
 using Plugin.Connectivity;
-using Plugin.Permissions;
-using Plugin.Permissions.Abstractions;
 using Storm.Mvvm;
 using Xamarin.Forms;
 using Xamarin.Forms.Maps;
@@ -86,25 +84,6 @@ namespace Fourplaces.ViewModels
             ButtonEnabled = true;
         }
 
-        private async Task<PermissionStatus> CheckLocationPermission()
-        {
-            var status = await CrossPermissions.Current.CheckPermissionStatusAsync(Permission.Location);
-            if (status != PermissionStatus.Granted)
-            {
-                if (await CrossPermissions.Current.ShouldShowRequestPermissionRationaleAsync(Permission.Location))
-                {
-                    await Application.Current.MainPage.DisplayAlert("Localisation",
-                        "La localisation est nécessaire pour afficher la position du lieu.", "Ok");
-                }
-
-                var results = await CrossPermissions.Current.RequestPermissionsAsync(Permission.Location);
-                if (results.ContainsKey(Permission.Location))
-                    status = results[Permission.Location];
-            }
-
-            return status;
-        }
-
         private void SetPlace(PlaceItem place)
         {
             Description = place.Description;
@@ -118,6 +97,8 @@ namespace Fourplaces.ViewModels
                 Label = place.Title
             };
             MyMap.Pins.Add(pin);
+            place.Comments.Sort((x, y) => y.Date.CompareTo(x.Date));
+            Comments.Clear();
             foreach (var comment in place.Comments)
             {
                 Comments.Add(comment);
