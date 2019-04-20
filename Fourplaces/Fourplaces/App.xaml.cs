@@ -6,6 +6,7 @@ using Fourplaces.Pages;
 using MonkeyCache.SQLite;
 
 [assembly: XamlCompilation(XamlCompilationOptions.Compile)]
+
 namespace Fourplaces
 {
     public partial class App : Application
@@ -19,6 +20,7 @@ namespace Fourplaces
         public static readonly string PlaceListCacheUrl = "placeListCache";
         public static readonly string PlaceDetailCacheUrl = "placeDetailCache";
         public static readonly string UserCacheUrl = "userCache";
+        public static readonly int CacheTime = 1;
 
         public App()
         {
@@ -28,11 +30,9 @@ namespace Fourplaces
         }
 
 
-        
-
         protected override void OnStart()
         {
-            // Handle when your app starts
+
         }
 
         protected override void OnSleep()
@@ -44,6 +44,5 @@ namespace Fourplaces
         {
             // Handle when your app resumes
         }
-
     }
 }

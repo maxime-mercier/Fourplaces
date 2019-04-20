@@ -124,7 +124,7 @@ namespace Fourplaces.ViewModels
                 if (placesResponse.IsSuccess)
                 {
                     place = placesResponse.Data;
-                    Barrel.Current.Add(App.PlaceDetailCacheUrl + CurrentPlaceId, place, TimeSpan.FromHours(1));
+                    Barrel.Current.Add(App.PlaceDetailCacheUrl + CurrentPlaceId, place, TimeSpan.FromDays(App.CacheTime));
                 }
                 else
 

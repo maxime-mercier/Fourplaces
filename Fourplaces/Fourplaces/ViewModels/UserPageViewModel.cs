@@ -139,7 +139,7 @@ namespace Fourplaces.ViewModels
                 if (response.IsSuccess)
                 {
                     item = response.Data;
-                    Barrel.Current.Add(App.UserCacheUrl, item, TimeSpan.FromHours(1));
+                    Barrel.Current.Add(App.UserCacheUrl, item, TimeSpan.FromDays(App.CacheTime));
                 }
                 else
                 {

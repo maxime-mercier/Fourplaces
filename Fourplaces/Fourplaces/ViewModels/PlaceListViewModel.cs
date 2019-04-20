@@ -108,7 +108,7 @@ namespace Fourplaces.ViewModels
                         Places.Add(item);
                     }
 
-                    Barrel.Current.Add(App.PlaceListCacheUrl, placesResponse.Data, TimeSpan.FromHours(1));
+                    Barrel.Current.Add(App.PlaceListCacheUrl, placesResponse.Data, TimeSpan.FromDays(App.CacheTime));
                 }
                 else
                 {
